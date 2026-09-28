@@ -43,7 +43,7 @@ export type CharacterConfig = {
 	FlightProfile: string?, -- key into BalanceConfig.Flight.Profiles
 	Palette: Palette,
 	Passive: PassiveDef?,
-	Abilities: { [AbilitySlot]: AbilityDef },
+	Abilities: { [string]: AbilityDef }, -- keyed by AbilitySlot
 	-- AssetRegistry keys (animations / sounds / vfx). Filled in per phase.
 	Animations: { [string]: string },
 	Sounds: { [string]: string },
