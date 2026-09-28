@@ -56,6 +56,12 @@ local Registry: { [string]: AssetEntry } = {
 	["Sound.Explosion"] = { Id = 0, Kind = "Sound", Status = "Procedural", Notes = "Uses the built-in Explosion instance sound (Visible = false)." },
 	["VFX.Hit"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Pooled spark/flash emitter + damage number billboards" },
 	["VFX.Beam"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Core + glow Beam objects, impact particles, PointLight, scorch marks" },
+	-- Phase 6: destruction
+	["Sound.Glass.Shatter"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Glass break. Replace with a real shatter." },
+	["Sound.Crumble"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Concrete/brick crunch (pitched down)." },
+	["Sound.Metal.Clang"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Steel bend/break clang." },
+	["Sound.Collapse"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Building section collapse rumble." },
+	["VFX.Debris"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Pooled client micro-debris, shards, dust, sparks" },
 	["Animation.Combat"] = { Id = 0, Kind = "Animation", Status = "Procedural", Notes = "All combat/ability poses are procedural keyframes in PoseLibrary. Add real animation IDs per character and match BalanceConfig WindUp to their 'Hit' markers." },
 }
 
