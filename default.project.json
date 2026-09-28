@@ -1,0 +1,17 @@
+{
+  "name": "ApexCity",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "ApexCity": { "$path": "src/shared" }
+    },
+    "ServerScriptService": {
+      "ApexCity": { "$path": "src/server" }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "ApexCity": { "$path": "src/client" }
+      }
+    }
+  }
+}

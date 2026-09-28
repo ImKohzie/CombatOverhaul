@@ -1,0 +1,5 @@
+sourcemap.json
+out/
+*.rbxm
+*.rbxl
+!release/*.rbxm
