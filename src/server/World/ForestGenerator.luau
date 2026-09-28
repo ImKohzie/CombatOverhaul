@@ -66,11 +66,7 @@ local function distanceToPolyline(p: Vector3, points: { Vector3 }): number
 	return best
 end
 
-local RIVER = {
-	Vector3.new(Forest.Lake.X + 150, 0, Forest.Lake.Z + 60), Vector3.new(-1700, 0, -2000),
-	Vector3.new(-900, 0, -2150), Vector3.new(200, 0, -2000), Vector3.new(1000, 0, -1750),
-	Vector3.new(1400, 0, -1520),
-}
+local RIVER: { Vector3 } = Forest.River
 
 local function hills(rng: Random)
 	local placed = 0

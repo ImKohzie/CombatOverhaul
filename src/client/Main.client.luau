@@ -23,6 +23,10 @@ require(Controllers.AbilityInputController).init()
 require(Controllers.BeamController).init()
 require(Controllers.CharacterFx).init()
 require(Controllers.BorderController).init()
+require(Controllers.EnvironmentController).init()
+task.spawn(function()
+	require(Controllers.AmbienceController).init()
+end)
 if GameConfig.Debug.ShowDebugHud then
 	require(Controllers.DebugHud).init()
 end

@@ -99,8 +99,13 @@ local function colorFrom(payload: { [string]: any }): Color3
 	return glowFor(payload.Source)
 end
 
+local playSound: ((string, { [string]: any }) -> ())? = nil
+
 -- Expanding ring perpendicular to the flight direction on entering boost.
 handlers.SonicBoom = function(payload)
+	if playSound and typeof(payload.Position) == "Vector3" then
+		playSound("Sound.SonicBoom", { Position = payload.Position, Volume = 1.2, Pitch = 0.4, MaxDistance = 500 })
+	end
 	local position = payload.Position
 	local direction = payload.Direction
 	if typeof(position) ~= "Vector3" or typeof(direction) ~= "Vector3" or direction.Magnitude < 1e-3 then
@@ -274,6 +279,11 @@ function EffectsController.play(name: string, payload: { [string]: any })
 	if handler then
 		handler(payload)
 	end
+end
+
+-- SoundLibrary injects itself here (avoids a require cycle).
+function EffectsController.setSoundPlayer(player: (string, { [string]: any }) -> ())
+	playSound = player
 end
 
 function EffectsController.init()

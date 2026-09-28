@@ -62,6 +62,20 @@ local Registry: { [string]: AssetEntry } = {
 	["Sound.Metal.Clang"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Steel bend/break clang." },
 	["Sound.Collapse"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Building section collapse rumble." },
 	["VFX.Debris"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Pooled client micro-debris, shards, dust, sparks" },
+	-- Phase 7: ambience. Id 0 = silent until you add a licensed asset ID.
+	-- Entries with CharacterSound play a re-pitched built-in loop meanwhile.
+	["Ambience.City.Traffic"] = { Id = 0, CharacterSound = "FreeFalling", Kind = "Sound", Status = "Placeholder", Notes = "City traffic hum loop (fallback: wind loop pitched very low)." },
+	["Ambience.City.Horns"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Distant car horns one-shots. Needs asset." },
+	["Ambience.City.Sirens"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Distant sirens one-shots. Needs asset." },
+	["Ambience.City.Crowd"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Crowd chatter loop near the park and diner. Needs asset." },
+	["Ambience.City.Pigeons"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Pigeons near the park. Needs asset." },
+	["Ambience.Subway.Rumble"] = { Id = 0, CharacterSound = "FreeFalling", Kind = "Sound", Status = "Placeholder", Notes = "Subway rumble at the station (fallback: wind loop pitched low)." },
+	["Ambience.Forest.Birds"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Daytime birdsong loop. Needs asset." },
+	["Ambience.Forest.Night"] = { Id = 0, Kind = "Sound", Status = "Placeholder", Notes = "Crickets + owls loop at night. Needs asset." },
+	["Ambience.Forest.Wind"] = { Id = 0, CharacterSound = "FreeFalling", Kind = "Sound", Status = "Placeholder", Notes = "Wind in the trees (fallback: wind loop)." },
+	["Ambience.River"] = { Id = 0, CharacterSound = "Swimming", Kind = "Sound", Status = "Placeholder", Notes = "River flow near the river and lake (fallback: swim loop pitched low)." },
+	["Ambience.Rain"] = { Id = 0, CharacterSound = "FreeFalling", Kind = "Sound", Status = "Placeholder", Notes = "Rain loop (fallback: wind loop pitched high)." },
+	["Sound.SonicBoom"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Boost sonic boom (fallback: thump pitched down)." },
 	["Animation.Combat"] = { Id = 0, Kind = "Animation", Status = "Procedural", Notes = "All combat/ability poses are procedural keyframes in PoseLibrary. Add real animation IDs per character and match BalanceConfig WindUp to their 'Hit' markers." },
 }
 

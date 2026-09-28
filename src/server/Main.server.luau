@@ -16,6 +16,7 @@ local order: { { init: () -> () } } = {
 	require(Services.CharacterService),
 	require(Services.DestructionService),
 	require(Services.WorldService),
+	require(Services.EnvironmentService),
 	require(Services.NPCService),
 	require(Services.AbilityService),
 }

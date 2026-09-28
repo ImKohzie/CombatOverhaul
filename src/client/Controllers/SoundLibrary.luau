@@ -96,6 +96,16 @@ function SoundLibrary.play(key: string, options: PlayOptions?): Sound?
 	return sound
 end
 
+-- Let EffectsController play sounds without requiring us (no cycle).
+task.defer(function()
+	local ok, effects = pcall(require, script.Parent.EffectsController)
+	if ok then
+		(effects :: any).setSoundPlayer(function(key: string, options: { [string]: any })
+			SoundLibrary.play(key, options :: any)
+		end)
+	end
+end)
+
 -- Built-in explosion boom (no visual, no physics).
 function SoundLibrary.explosion(position: Vector3)
 	local explosion = Instance.new("Explosion")

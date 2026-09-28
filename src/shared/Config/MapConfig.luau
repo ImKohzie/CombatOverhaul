@@ -46,6 +46,10 @@ MapConfig.Forest = {
 	TreeCount = 1500,
 	HillCount = 60,
 	Lake = { X = -2350, Z = -2250, Radius = 190 },
+	River = {
+		Vector3.new(-2200, 0, -2190), Vector3.new(-1700, 0, -2000), Vector3.new(-900, 0, -2150),
+		Vector3.new(200, 0, -2000), Vector3.new(1000, 0, -1750), Vector3.new(1400, 0, -1520),
+	},
 	Cabin = { X = -2150, Z = -1950 },
 	TerrainTile = 480,
 	TerrainDepth = 14,

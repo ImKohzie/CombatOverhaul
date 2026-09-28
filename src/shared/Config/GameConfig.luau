@@ -30,6 +30,18 @@ GameConfig.Debris = {
 	RebuildTime = 120,
 }
 
+GameConfig.Environment = {
+	DayLengthSeconds = 1200, -- full 24h cycle in 20 real minutes
+	StartClockTime = 14,
+	DuskClockTime = 18.1, -- city lights on
+	DawnClockTime = 6.3, -- city lights off
+	RainCheckInterval = { 240, 480 }, -- seconds between weather rolls
+	RainChance = 0.35,
+	RainDuration = { 120, 240 },
+	CityAtmosphereDensity = 0.3,
+	ForestAtmosphereDensity = 0.46,
+}
+
 GameConfig.Dummies = {
 	Enabled = true,
 	Roles = { "Tank", "Bruiser", "Balanced", "Agile" },
