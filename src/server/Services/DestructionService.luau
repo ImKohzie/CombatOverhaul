@@ -60,6 +60,7 @@ type ChunkState = {
 	transparency: number,
 	anchoredChildren: { BasePart },
 	childOrigins: { [BasePart]: CFrame },
+	childrenCaptured: boolean,
 	broken: boolean,
 	loose: boolean, -- fallen as part of a collapsed island
 	dented: boolean,
@@ -96,14 +97,10 @@ local function register(instance: Instance)
 	local volume = part.Size.X * part.Size.Y * part.Size.Z
 	local base = STRENGTH[kind] or 300
 	local maxHealth = if kind == "Glass" then 1 else base * math.clamp(volume / 500, 0.5, 3)
+	-- Decor children (windows, trims) are captured lazily: map builders add
+	-- them after the chunk is tagged.
 	local anchoredChildren: { BasePart } = {}
 	local childOrigins: { [BasePart]: CFrame } = {}
-	for _, descendant in part:GetDescendants() do
-		if descendant:IsA("BasePart") then
-			table.insert(anchoredChildren, descendant)
-			childOrigins[descendant] = descendant.CFrame
-		end
-	end
 	local state: ChunkState = {
 		part = part,
 		kind = kind,
@@ -117,6 +114,7 @@ local function register(instance: Instance)
 		transparency = part.Transparency,
 		anchoredChildren = anchoredChildren,
 		childOrigins = childOrigins,
+		childrenCaptured = false,
 		broken = false,
 		loose = false,
 		dented = false,
@@ -129,6 +127,21 @@ local function register(instance: Instance)
 	end
 	table.insert(building.chunks, state)
 	building.neighbors = nil -- graph is rebuilt lazily
+end
+
+-- Record the chunk's decor children and their original placement (called
+-- right before a chunk first moves).
+local function captureChildren(state: ChunkState)
+	if state.childrenCaptured then
+		return
+	end
+	state.childrenCaptured = true
+	for _, descendant in state.part:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			table.insert(state.anchoredChildren, descendant)
+			state.childOrigins[descendant] = descendant.CFrame
+		end
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -296,6 +309,7 @@ local function collapseUnsupported(building: Building, impact: Vector3)
 		local anchor = island[1].part
 		local owner = nearestPlayer(anchor.Position)
 		for _, member in island do
+			captureChildren(member)
 			member.loose = true
 			local part = member.part
 			if part ~= anchor then
@@ -404,6 +418,7 @@ function DestructionService.damagePart(part: BasePart, position: Vector3, damage
 	end
 	-- Steel bends / dents before it breaks
 	if state.kind == "Steel" and not state.dented and state.health < state.maxHealth * 0.5 then
+		captureChildren(state)
 		state.dented = true
 		local offset = part.CFrame:PointToObjectSpace(position)
 		part.CFrame = part.CFrame * CFrame.Angles(math.rad(math.sign(offset.Y) * 4), 0, math.rad(math.sign(offset.X) * -3))
