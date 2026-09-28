@@ -33,6 +33,11 @@ local FLAG_ATTRIBUTES: { [string]: string } = {
 	Hardened = "ApexHardened",
 	BraceBeam = "ApexBraceBeam",
 	Colossal = "ApexColossal",
+	Unstoppable = "ApexUnstoppable",
+	Skating = "ApexSkating",
+	Eclipse = "ApexEclipse",
+	ShieldOut = "ApexShieldOut",
+	BoardOut = "ApexBoardOut",
 }
 
 local MAX_EXTRA_REDUCTION = 0.8

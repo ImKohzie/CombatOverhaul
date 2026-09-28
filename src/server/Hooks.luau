@@ -47,4 +47,22 @@ Hooks.isStructure = function(_part: BasePart): boolean
 	return false
 end
 
+-- DestructionService: break every glass chunk in a cone (Sonic Scream).
+Hooks.shatterGlassCone = function(_origin: Vector3, _direction: Vector3, _range: number, _halfAngle: number, _source: Model?) end
+
+-- DestructionService: destroy the lowest supports of structures in a radius
+-- so they collapse under their own weight (Frequency Collapse).
+Hooks.collapseFromBase = function(_center: Vector3, _radius: number, _source: Model?) end
+
+-- DestructionService: structures in the sphere break from any hit (Absolute Zero).
+Hooks.setBrittle = function(_center: Vector3, _radius: number, _duration: number) end
+
+-- DestructionService: pull loose debris toward a point (gravity abilities).
+Hooks.pullDebris = function(_center: Vector3, _radius: number, _strength: number) end
+
+-- DestructionService: remove one chunk and return its look (Rip & Throw).
+Hooks.ripChunk = function(_part: BasePart): (Color3?, Enum.Material?)
+	return nil, nil
+end
+
 return Hooks

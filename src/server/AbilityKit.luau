@@ -358,6 +358,8 @@ export type ProjectileOptions = {
 	Gravity: number?,
 	Homing: Model?, -- steer toward this character
 	HomingStrength: number?, -- radians/second
+	Light: boolean?, -- light projectile: reflected by Hardened characters
+	ReflectDamage: number?,
 	Visual: string?, -- effect name for clients ("Projectile" handler)
 	VisualData: { [string]: any }?,
 	OnHit: (hitPosition: Vector3, character: Model?, part: BasePart?) -> (),
@@ -416,6 +418,38 @@ function Kit.projectile(options: ProjectileOptions)
 		if hit then
 			connection:Disconnect()
 			local character = Kit.characterFromPart(hit.Instance)
+			-- Hardened characters (Bastion) reflect light projectiles back.
+			if character and options.Light and character:GetAttribute("ApexHardened") == true then
+				Kit.fx("ProjectileEnd", hit.Position, { Id = id })
+				local ownerRoot = Kit.rootOf(options.Owner)
+				local reflector = character
+				local reflectDamage = options.ReflectDamage or 40
+				if ownerRoot then
+					Kit.projectile({
+						Origin = hit.Position,
+						Direction = ownerRoot.Position - hit.Position,
+						Speed = options.Speed,
+						Range = options.Range,
+						Radius = options.Radius,
+						Owner = reflector,
+						Visual = options.Visual,
+						VisualData = options.VisualData,
+						OnHit = function(_position, target, _part)
+							if target then
+								local reflectorPlayer = Players:GetPlayerFromCharacter(reflector)
+								Hooks.applyDamage(target, {
+									Amount = reflectDamage,
+									Attacker = reflectorPlayer,
+									AttackerCharacter = reflector,
+									Kind = "Projectile",
+									Tag = "Reflected",
+								})
+							end
+						end,
+					})
+				end
+				return
+			end
 			Kit.fx("ProjectileEnd", hit.Position, { Id = id })
 			options.OnHit(hit.Position, character, if hit.Instance:IsA("BasePart") then hit.Instance else nil)
 			return
@@ -449,6 +483,74 @@ function Kit.blast(ctx: AbilityContext, center: Vector3, radius: number, damage:
 		Hooks.structureDamageSphere(center, radius, structureDamage, knockback * 20, ctx.Character)
 	end
 	return hits
+end
+
+-- Blast with distance falloff: full damage inside innerRadius, scaling down
+-- to minFraction at radius. Optional per-target cap table for multi-hit.
+function Kit.falloffBlast(ctx: AbilityContext, center: Vector3, radius: number, innerRadius: number, damage: number, minFraction: number, knockback: number, lift: number, ragdoll: number?, extra: { [string]: any }?): { Model }
+	local hits = Kit.inSphere(center, radius, { ctx.Character })
+	for _, victim in hits do
+		local root = Kit.rootOf(victim)
+		if root then
+			local distance = (root.Position - center).Magnitude
+			local t = math.clamp((distance - innerRadius) / math.max(radius - innerRadius, 1), 0, 1)
+			local fraction = 1 - (1 - minFraction) * t
+			local info: { [string]: any } = {
+				Kind = "AoE",
+				Position = center,
+				Knockback = Kit.awayFrom(center, victim, knockback * fraction, lift),
+				Ragdoll = ragdoll,
+				HitStun = 0.6,
+			}
+			if extra then
+				for key, value in extra do
+					info[key] = value
+				end
+			end
+			Kit.damage(ctx, victim, damage * fraction, info)
+		end
+	end
+	return hits
+end
+
+-- Pull characters toward a point (gravity wells). Strength = studs/second.
+function Kit.pull(ctx: AbilityContext, center: Vector3, radius: number, strength: number)
+	for _, victim in Kit.inSphere(center, radius, { ctx.Character }) do
+		local root = Kit.rootOf(victim)
+		if root then
+			local offset = center - root.Position
+			if offset.Magnitude > 2 then
+				ReactionService.knockback(victim, offset.Unit * strength + Vector3.new(0, 4, 0), nil, ctx.Player, ctx.Character)
+			end
+		end
+	end
+	Hooks.pullDebris(center, radius, strength)
+end
+
+-- Temporary per-target damage budget (multi-tick abilities never exceed it).
+function Kit.budget(total: number): (victim: Model, amount: number) -> number
+	local spent: { [Model]: number } = {}
+	return function(victim: Model, amount: number): number
+		local used = spent[victim] or 0
+		local allowed = math.max(0, math.min(amount, total - used))
+		spent[victim] = used + allowed
+		return allowed
+	end
+end
+
+-- Anchored, non-colliding helper part in the server effects folder.
+function Kit.serverPart(size: Vector3, cframe: CFrame, color: Color3, material: Enum.Material, collide: boolean?): Part
+	local part = Instance.new("Part")
+	part.Anchored = true
+	part.CanCollide = collide == true
+	part.CanQuery = collide == true
+	part.CanTouch = false
+	part.Size = size
+	part.CFrame = cframe
+	part.Color = color
+	part.Material = material
+	part.Parent = Kit.effectsFolder()
+	return part
 end
 
 Kit.Status = StatusService
