@@ -59,6 +59,7 @@ export type AbilityBalance = {
 	Range: number?,
 	Duration: number?,
 	StaminaCost: number?,
+	Channel: boolean?, -- the caster is committed for Duration (beams, flurries)
 	Params: { [string]: number }?,
 }
 

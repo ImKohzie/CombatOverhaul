@@ -13,6 +13,7 @@
 export type AssetEntry = {
 	Id: number,
 	Content: string?, -- built-in "rbxasset://" content used when Id is 0
+	CharacterSound: string?, -- fallback: copy the SoundId of this default character sound (e.g. "Landing")
 	Kind: "Animation" | "Sound" | "Texture" | "Mesh" | "Decal" | "Model",
 	Status: "Procedural" | "Placeholder" | "Verified",
 	Notes: string,
@@ -42,6 +43,20 @@ local Registry: { [string]: AssetEntry } = {
 	["VFX.SpeedLines"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Screen-edge UI streaks in CameraController" },
 	["Model.Board"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Argent chrome board built from parts in MovementService" },
 	["Model.Glider"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Nightwing Goblin glider built from parts in MovementService" },
+
+	-- Phase 3: combat. Id 0 = placeholder; the fallback plays a built-in
+	-- Roblox character sound re-pitched so every hit still has audio.
+	["Sound.Hit.Light"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Layer 1 thump. Replace with a punch impact." },
+	["Sound.Hit.Heavy"] = { Id = 0, CharacterSound = "Landing", Kind = "Sound", Status = "Placeholder", Notes = "Heavy thump + crunch. Replace with a layered heavy impact." },
+	["Sound.Hit.Block"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Blocked hit clack." },
+	["Sound.Parry"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Perfect parry ring (pitched up)." },
+	["Sound.Whoosh"] = { Id = 0, CharacterSound = "Jumping", Kind = "Sound", Status = "Placeholder", Notes = "Swing whoosh." },
+	["Sound.Beam.Hum"] = { Id = 0, CharacterSound = "FreeFalling", Kind = "Sound", Status = "Placeholder", Notes = "Looped beam hum (wind loop pitched up)." },
+	["Sound.Ult.Sting"] = { Id = 0, CharacterSound = "GettingUp", Kind = "Sound", Status = "Placeholder", Notes = "Ultimate music sting. Needs a real stinger." },
+	["Sound.Explosion"] = { Id = 0, Kind = "Sound", Status = "Procedural", Notes = "Uses the built-in Explosion instance sound (Visible = false)." },
+	["VFX.Hit"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Pooled spark/flash emitter + damage number billboards" },
+	["VFX.Beam"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Core + glow Beam objects, impact particles, PointLight, scorch marks" },
+	["Animation.Combat"] = { Id = 0, Kind = "Animation", Status = "Procedural", Notes = "All combat/ability poses are procedural keyframes in PoseLibrary. Add real animation IDs per character and match BalanceConfig WindUp to their 'Hit' markers." },
 }
 
 local AssetRegistry = {}

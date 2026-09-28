@@ -127,8 +127,18 @@ local function step(_dt: number)
 	local speed = roleSpeed()
 		* (if sprinting then BalanceConfig.Movement.SprintMultiplier else 1)
 		* (if type(multiplier) == "number" then multiplier else 1)
-	if os.clock() < lockedUntil then
+	if os.clock() < lockedUntil or character:GetAttribute("ApexStunned") == true or character:GetAttribute("ApexRagdoll") == true then
 		speed = 0
+	end
+	-- Can't jump while stunned / bound; time-slowed jumps are weak
+	local jumpPower = BalanceConfig.Movement.JumpPower
+	if character:GetAttribute("ApexStunned") == true then
+		jumpPower = 0
+	elseif character:GetAttribute("ApexTimeSlowed") == true then
+		jumpPower *= 0.4
+	end
+	if humanoid.JumpPower ~= jumpPower then
+		humanoid.JumpPower = jumpPower
 	end
 	if humanoid.WalkSpeed ~= speed then
 		humanoid.WalkSpeed = speed

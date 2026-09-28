@@ -30,8 +30,15 @@ GameConfig.Debris = {
 	RebuildTime = 120,
 }
 
+GameConfig.Dummies = {
+	Enabled = true,
+	Roles = { "Tank", "Bruiser", "Balanced", "Agile" },
+	RespawnTime = 5,
+}
+
 GameConfig.Debug = {
-	ShowDebugHud = true, -- temporary HUD until Phase 8 UI
+	ShowDebugHud = false, -- old Phase 1 debug panel (the real HUD replaces it)
+	PrintBalanceMatrix = true, -- print the TTK matrix to the output on server start
 	VerboseNet = false, -- print every rejected remote request
 }
 

@@ -326,6 +326,10 @@ local function step(dt: number)
 		FlightController.stop(nil)
 		return
 	end
+	if s.character:GetAttribute("ApexServerMotion") == true or s.character:GetAttribute("ApexGrounded") == true then
+		FlightController.stop(nil)
+		return
+	end
 	-- Server has final say (stuns, grounding abilities, invalid state).
 	if os.clock() - s.startedAt > SERVER_CONFIRM_TIME and s.character:GetAttribute("ApexServerFlying") ~= true then
 		FlightController.stop(nil)
@@ -468,9 +472,20 @@ function FlightController.init()
 		end
 	end)
 
+	-- F: toggles flight when airborne or already flying; grounded F is block
+	-- (CombatController). Double-jump also takes off.
 	InputController.Began:Connect(function(action: string)
-		if action == "FlightOrBlock" and FlightController.canFly() then
-			FlightController.toggle()
+		if action ~= "FlightOrBlock" or not FlightController.canFly() then
+			return
+		end
+		if session then
+			FlightController.stop(nil)
+			return
+		end
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.FloorMaterial == Enum.Material.Air then
+			FlightController.start()
 		end
 	end)
 

@@ -1,7 +1,7 @@
 --!strict
 -- Plays cosmetic effects the server broadcasts through the Effect remote.
--- Effects never change gameplay state. Phase 3 adds pooling and the full
--- VFX library.
+-- Effects never change gameplay state. Other modules (CombatFx,
+-- ProjectileFx, BeamController, DestructionFx...) register more handlers.
 
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -258,6 +258,16 @@ handlers.Crater = function(payload)
 		end
 	end)
 end
+
+-- Register a handler for an effect name.
+function EffectsController.register(name: string, handler: Handler)
+	handlers[name] = handler
+end
+
+EffectsController.folder = getFolder
+EffectsController.part = effectPart
+EffectsController.colorFrom = colorFrom
+EffectsController.glowFor = glowFor
 
 function EffectsController.play(name: string, payload: { [string]: any })
 	local handler = handlers[name]

@@ -19,13 +19,16 @@ local Remotes = {}
 Remotes.Specs = {
 	-- Client -> server
 	AbilityInput = { Kind = "Event", Direction = "ClientToServer", RatePerSecond = 12, Burst = 20 },
-	CombatInput = { Kind = "Event", Direction = "ClientToServer", RatePerSecond = 20, Burst = 30 },
+	CombatInput = { Kind = "Event", Direction = "ClientToServer", RatePerSecond = 30, Burst = 40 },
 	MovementState = { Kind = "Event", Direction = "ClientToServer", RatePerSecond = 20, Burst = 30 },
 	SelectCharacter = { Kind = "Function", Direction = "ClientToServer", RatePerSecond = 0.5, Burst = 2 },
 
 	-- Server -> client
 	Effect = { Kind = "Event", Direction = "ServerToClient" },
 	Notify = { Kind = "Event", Direction = "ServerToClient" },
+	-- Knockback / launches / forced moves for the victim's own client (it
+	-- owns its character's physics, so the server asks it to apply them).
+	Impulse = { Kind = "Event", Direction = "ServerToClient" },
 } :: { [string]: RemoteSpec }
 
 local function getFolder(): Folder

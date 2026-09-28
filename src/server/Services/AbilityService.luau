@@ -16,6 +16,7 @@ local Validate = require(Shared.Net.Validate)
 local AbilityTypes = require(script.Parent.Parent.AbilityTypes)
 local NetService = require(script.Parent.NetService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local RunService = game:GetService("RunService")
 
 type AbilityContext = AbilityTypes.AbilityContext
 type AbilityModule = AbilityTypes.AbilityModule
@@ -104,7 +105,7 @@ local function beginAbility(player: Player, slot: string, origin: Vector3?, poin
 	if not humanoid or humanoid.Health <= 0 or not root or not root:IsA("BasePart") then
 		return
 	end
-	if character:GetAttribute("ApexStunned") == true then
+	if character:GetAttribute("ApexStunned") == true or character:GetAttribute("ApexServerMotion") == true then
 		return
 	end
 	local list = active[player]
@@ -171,6 +172,17 @@ local function beginAbility(player: Player, slot: string, origin: Vector3?, poin
 	end
 	if slot == "Ultimate" then
 		PlayerStateService.consumeUltimate(player)
+		-- Short skippable cinematic for the caster only; everyone nearby hears the sting.
+		NetService.fireClient("Effect", player, "UltCinematic", {
+			Source = character,
+			Name = def.Name,
+			Color = config.Palette.Glow,
+		})
+		NetService.fireNear("Effect", root.Position, 700, "UltSting", {
+			Source = character,
+			Name = def.Name,
+			Color = config.Palette.Glow,
+		})
 	end
 	PlayerStateService.startCooldown(player, slot, balance.Cooldown)
 
@@ -196,8 +208,25 @@ local function onAbilityInput(player: Player, slot: string, phase: string, origi
 	if phase == "Begin" then
 		beginAbility(player, slot, origin, point)
 	else
+		-- Charge / hold releases carry the latest aim (e.g. Lightning Hurl).
+		local list = active[player]
+		local ctx = list and list[slot]
+		if ctx and (origin or point) then
+			local head = ctx.Character:FindFirstChild("Head")
+			local aimOrigin, aimPoint = sanitizeAim(ctx.Root, if head and head:IsA("BasePart") then head else nil, ctx.Balance, origin, point)
+			if aimOrigin and aimPoint then
+				ctx.AimOrigin = aimOrigin
+				ctx.AimPoint = aimPoint
+			end
+		end
 		endAbility(player, slot)
 	end
+end
+
+-- Current context of a channelled ability (for modules that poll aim).
+function AbilityService.getActive(player: Player, slot: string): AbilityContext?
+	local list = active[player]
+	return if list then list[slot] else nil
 end
 
 -- Force-end everything (death, character switch, stun).
@@ -233,6 +262,19 @@ function AbilityService.init()
 	Players.PlayerRemoving:Connect(function(player)
 		AbilityService.cancelAll(player)
 		active[player] = nil
+	end)
+
+	-- Stuns interrupt channelled abilities.
+	RunService.Heartbeat:Connect(function()
+		for player, list in active do
+			if next(list) == nil then
+				continue
+			end
+			local character = player.Character
+			if character and character:GetAttribute("ApexStunned") == true and character:GetAttribute("ApexServerMotion") ~= true then
+				AbilityService.cancelAll(player)
+			end
+		end
 	end)
 end
 

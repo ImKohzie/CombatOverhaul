@@ -36,7 +36,10 @@ local appliedShake = CFrame.identity
 local speedLineIntensity = 0
 local speedLines: { Frame } = {}
 local crosshair: Frame
+local hitMarkerFrames: { Frame } = {}
+local hitMarkerUntil = 0
 local aimBlocked = false
+local cinematicActive = false
 
 --------------------------------------------------------------------------------
 -- Public API
@@ -112,6 +115,22 @@ local function buildOverlay()
 	stroke.Color = Color3.new(0, 0, 0)
 	stroke.Transparency = 1
 	stroke.Parent = crosshair
+
+	-- Hit marker: four short diagonal ticks around the crosshair
+	for i = 0, 3 do
+		local tick = Instance.new("Frame")
+		tick.Name = "HitMarker"
+		tick.AnchorPoint = Vector2.new(0.5, 0.5)
+		local angle = math.rad(45 + i * 90)
+		tick.Position = UDim2.new(0.5, math.cos(angle) * 11, 0.5, math.sin(angle) * 11)
+		tick.Size = UDim2.fromOffset(9, 2)
+		tick.Rotation = 45 + i * 90
+		tick.BorderSizePixel = 0
+		tick.BackgroundColor3 = Color3.new(1, 1, 1)
+		tick.BackgroundTransparency = 1
+		tick.Parent = gui
+		table.insert(hitMarkerFrames, tick)
+	end
 
 	for i = 1, SPEED_LINE_COUNT do
 		local line = Instance.new("Frame")
@@ -208,6 +227,98 @@ local function afterCamera(dt: number)
 	end
 
 	updateSpeedLines()
+
+	-- Hit marker fade
+	local markerAlpha = math.clamp((hitMarkerUntil - os.clock()) / 0.18, 0, 1)
+	for _, tick in hitMarkerFrames do
+		tick.BackgroundTransparency = 1 - markerAlpha
+	end
+end
+
+-- Flash the hit marker (red for heavy hits).
+function CameraController.hitMarker(heavy: boolean)
+	hitMarkerUntil = os.clock() + 0.18
+	for _, tick in hitMarkerFrames do
+		tick.BackgroundColor3 = if heavy then Color3.fromRGB(255, 80, 70) else Color3.new(1, 1, 1)
+		tick.Size = if heavy then UDim2.fromOffset(12, 3) else UDim2.fromOffset(9, 2)
+	end
+end
+
+function CameraController.isCinematic(): boolean
+	return cinematicActive
+end
+
+-- Short ultimate camera moment for the local player only. Any input skips
+-- it; it never affects other players' cameras.
+function CameraController.cinematic(character: Model, duration: number, color: Color3?)
+	local camera = workspace.CurrentCamera
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if cinematicActive or not camera or not root or not root:IsA("BasePart") then
+		return
+	end
+	cinematicActive = true
+	local previousType = camera.CameraType
+	local previousCFrame = camera.CFrame
+	camera.CameraType = Enum.CameraType.Scriptable
+
+	local gui = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("ApexCameraOverlay")
+	local flash: Frame? = nil
+	if gui then
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.fromScale(1, 1)
+		frame.BackgroundColor3 = color or Color3.new(1, 1, 1)
+		frame.BackgroundTransparency = 0.6
+		frame.BorderSizePixel = 0
+		frame.ZIndex = 10
+		frame.Parent = gui
+		flash = frame
+		for _, y in { 0, 1 } do
+			local bar = Instance.new("Frame")
+			bar.AnchorPoint = Vector2.new(0, y)
+			bar.Position = UDim2.fromScale(0, y)
+			bar.Size = UDim2.new(1, 0, 0.1, 0)
+			bar.BackgroundColor3 = Color3.new(0, 0, 0)
+			bar.BorderSizePixel = 0
+			bar.ZIndex = 11
+			bar.Parent = frame
+		end
+	end
+
+	local skipped = false
+	local skipConnection = UserInputService.InputBegan:Connect(function(input, processed)
+		if not processed and input.UserInputType ~= Enum.UserInputType.MouseMovement then
+			skipped = true
+		end
+	end)
+	local started = os.clock()
+	local connection: RBXScriptConnection
+	local function finish()
+		connection:Disconnect()
+		skipConnection:Disconnect()
+		if flash then
+			flash:Destroy()
+		end
+		camera.CameraType = previousType
+		if previousType == Enum.CameraType.Scriptable then
+			camera.CFrame = previousCFrame
+		end
+		cinematicActive = false
+	end
+	connection = RunService.RenderStepped:Connect(function()
+		local t = (os.clock() - started) / duration
+		if t >= 1 or skipped or root.Parent == nil then
+			finish()
+			return
+		end
+		if flash then
+			flash.BackgroundTransparency = 0.6 + 0.4 * math.min(1, t * 3)
+		end
+		local center = root.Position + Vector3.new(0, 1.5, 0)
+		local angle = math.rad(-40 + 80 * t) + math.atan2(-root.CFrame.LookVector.X, -root.CFrame.LookVector.Z)
+		local distance = 11 - 3 * t
+		local eye = center + Vector3.new(math.sin(angle) * distance, 1 - 2.5 * t, math.cos(angle) * distance)
+		camera.CFrame = CFrame.lookAt(eye, center)
+	end)
 end
 
 function CameraController.init()

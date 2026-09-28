@@ -67,7 +67,8 @@ function AbilityInputController.init()
 	InputController.Ended:Connect(function(action: string)
 		local slot = SLOTS[action]
 		if slot and currentInputKind(slot) ~= "Instant" then
-			abilityRemote:FireServer(slot, "End")
+			local origin, point = AbilityInputController.getAim()
+			abilityRemote:FireServer(slot, "End", origin, point)
 		end
 	end)
 end

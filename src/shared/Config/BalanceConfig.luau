@@ -95,6 +95,16 @@ BalanceConfig.Flight = {
 --------------------------------------------------------------------------------
 -- Melee / defence
 --------------------------------------------------------------------------------
+export type AttackTiming = {
+	WindUp: number, -- seconds before the hitbox is active (animation "Hit" marker)
+	Active: number, -- hitbox lifetime
+	Recovery: number, -- time after the active frames before the next action
+	Knockback: number, -- studs/second applied along the attacker's facing
+	Lift: number?, -- upward studs/second
+	Ragdoll: number?, -- seconds of ragdoll on hit
+	HitStun: number, -- seconds the victim can't act
+}
+
 BalanceConfig.Melee = {
 	ComboDamage = { 35, 35, 40, 50 }, -- = 160 full combo
 	ComboInputWindow = 0.35,
@@ -106,7 +116,59 @@ BalanceConfig.Melee = {
 	HitStopMin = 0.05,
 	HitStopMax = 0.08,
 	HitRange = 7, -- hitbox forward reach (studs)
+	HitboxSize = Vector3.new(6, 6.5, 7),
 	MaxServerReach = 14, -- server rejects hits further than this from attacker
+	ComboSteps = {
+		{ WindUp = 0.1, Active = 0.08, Recovery = 0.16, Knockback = 6, HitStun = 0.4 },
+		{ WindUp = 0.1, Active = 0.08, Recovery = 0.16, Knockback = 6, HitStun = 0.4 },
+		{ WindUp = 0.12, Active = 0.08, Recovery = 0.2, Knockback = 10, HitStun = 0.45 },
+		{ WindUp = 0.16, Active = 0.1, Recovery = 0.45, Knockback = 55, Lift = 18, HitStun = 0.6 },
+	} :: { AttackTiming },
+	Heavy = { WindUp = 0.22, Active = 0.1, Recovery = 0.5, Knockback = 75, Lift = 25, Ragdoll = 1.1, HitStun = 0.8 } :: AttackTiming,
+	Aerial = { WindUp = 0.08, Active = 0.08, Recovery = 0.18, Knockback = 8, Lift = 22, HitStun = 0.45 } :: AttackTiming,
+	DiveSlam = {
+		DiveSpeed = 170,
+		Radius = 13,
+		Knockback = 60,
+		Lift = 35,
+		Ragdoll = 0.9,
+		MaxDiveTime = 1.5,
+	},
+}
+
+BalanceConfig.Reactions = {
+	RagdollGetUpTime = 0.6,
+	LaunchSpeedForWallSplat = 55, -- victim speed needed to splat into a wall
+	WallSplatDamage = 25,
+	WallSplatStun = 0.8,
+	WallSplatWindow = 1.2, -- seconds after a launch that splats are checked
+	HeavyHitThreshold = 60, -- hits this big count as "heavy" (resets momentum, bigger shake)
+}
+
+BalanceConfig.Beam = {
+	TickRate = 10, -- server damage checks per second
+	HeatMax = 100,
+	HeatPerSecond = 30, -- ~3.3s of continuous channel
+	HeatCoolPerSecond = 25,
+	OverheatLockout = 2,
+	MaxAimTurnDegreesPerSecond = 720, -- server clamps aim changes faster than this
+	ScorchInterval = 0.12,
+}
+
+BalanceConfig.Momentum = { -- Voltline passive
+	TierTime = 1.5, -- seconds of sustained sprint per tier (tier 4 at ~6s)
+	SpeedMultipliers = { 1, 1.2, 1.45, 1.75 },
+	FovBonus = { 0, 4, 8, 13 },
+	DropGrace = 0.4, -- slowing down for longer than this resets momentum
+	MinSpeedFraction = 0.75, -- of sprint speed to count as "running"
+}
+
+BalanceConfig.Rage = { -- Rampage passive
+	GainPerDamageTaken = 0.08, -- rage points per damage point (0..100)
+	DecayPerSecond = 2.5,
+	MaxScaleBonus = 0.2, -- +20% size at full rage
+	MaxDamageBonus = 0.25,
+	MaxKnockbackResistBonus = 0.4,
 }
 
 BalanceConfig.Defence = {
@@ -162,40 +224,40 @@ local Abilities: { [string]: { [string]: AbilityBalance } } = { -- [characterId]
 	Voltline = {
 		Ability1 = { Damage = 100, Cooldown = 12, Duration = 5, Params = { MinDuration = 3 } }, -- Phase Run
 		Ability2 = { Damage = 110, Cooldown = 9, WindUp = 0.5, Range = 160, Params = { MomentumBonusPerTier = 0.15 } }, -- Lightning Hurl
-		Ability3 = { Damage = 150, Cooldown = 13, Duration = 1, Params = { Hits = 10 } }, -- Blitz Barrage
+		Ability3 = { Damage = 150, Cooldown = 13, Duration = 1, Channel = true, Params = { Hits = 10 } }, -- Blitz Barrage
 		Ultimate = { Damage = 380, Cooldown = 1, Duration = 6, Params = { WorldTimeScale = 0.15 } }, -- Velocity Rift
 	},
 
 	OldGuard = {
 		Ability1 = { Damage = 110, Cooldown = 9, Range = 120, Params = { Bounces = 3 } }, -- Ricochet Shield
 		Ability2 = { Damage = 90, Cooldown = 8, Range = 10, Params = { StaggerTime = 0.8 } }, -- Shield Bash & Brace
-		Ability3 = { Damage = 180, Cooldown = 14, Duration = 1.4, Params = { Hits = 6 } }, -- Brawler's Fury
+		Ability3 = { Damage = 180, Cooldown = 14, Duration = 1.4, Channel = true, Params = { Hits = 6 } }, -- Brawler's Fury
 		Ultimate = { Damage = 400, Cooldown = 1, WindUp = 2, Range = 70, Params = { ZoneDps = 15, ZoneDuration = 6 } }, -- Core Meltdown
 	},
 
 	Sovereign = {
-		Ability1 = { Damage = 180, Cooldown = 12, Duration = 3, Range = 300, Params = { Dps = 60 } }, -- Ocular Beam
+		Ability1 = { Damage = 180, Cooldown = 12, Duration = 3, Range = 300, Channel = true, Params = { Dps = 60 } }, -- Ocular Beam
 		Ability2 = { Damage = 100, Cooldown = 9, Range = 40, Params = { StunTime = 0.9, ConeDegrees = 70 } }, -- Sonic Clap
 		Ability3 = { Damage = 170, Cooldown = 14, WindUp = 0.3, Range = 14, Params = { LiftHeight = 120 } }, -- Skyfall Grab
-		Ultimate = { Damage = 450, Cooldown = 1, Duration = 3, Range = 500, Params = { ArcDegrees = 180 } }, -- Judgement
+		Ultimate = { Damage = 450, Cooldown = 1, Duration = 3, Range = 500, Channel = true, Params = { ArcDegrees = 180 } }, -- Judgement
 	},
 
 	Rampage = {
 		Ability1 = { Damage = 130, Cooldown = 10, WindUp = 0.4, Range = 50 }, -- Thunderclap
 		Ability2 = { Damage = 140, Cooldown = 12, Range = 300, Params = { CraterRadius = 22 } }, -- Gamma Leap
 		Ability3 = { Damage = 160, Cooldown = 13, WindUp = 0.7, Range = 200 }, -- Rip & Throw
-		Ultimate = { Damage = 460, Cooldown = 1, Duration = 4, Range = 80 }, -- World Breaker
+		Ultimate = { Damage = 460, Cooldown = 1, Duration = 4, Range = 80, Channel = true }, -- World Breaker
 	},
 
 	NightwingGoblin = {
 		Ability1 = { Damage = 135, Cooldown = 10, Range = 90, Params = { Bombs = 3 } }, -- Shade Bombs
 		Ability2 = { Damage = 120, Cooldown = 9, Range = 80 }, -- Blade Swoop
 		Ability3 = { Damage = 140, Cooldown = 12, Range = 250, Params = { Missiles = 4 } }, -- Talon Missiles
-		Ultimate = { Damage = 420, Cooldown = 1, Duration = 4, Range = 400 }, -- Carpet Run
+		Ultimate = { Damage = 420, Cooldown = 1, Duration = 4, Range = 400, Channel = true }, -- Carpet Run
 	},
 
 	Argent = {
-		Ability1 = { Damage = 165, Cooldown = 12, Duration = 3, Range = 300, Params = { Dps = 55 } }, -- Cosmic Lance
+		Ability1 = { Damage = 165, Cooldown = 12, Duration = 3, Range = 300, Channel = true, Params = { Dps = 55 } }, -- Cosmic Lance
 		Ability2 = { Damage = 110, Cooldown = 11, Range = 120 }, -- Matter Reshape
 		Ability3 = { Damage = 130, Cooldown = 10, Duration = 4, Range = 30 }, -- Board Strike
 		Ultimate = { Damage = 450, Cooldown = 1, WindUp = 1.2, Range = 90 }, -- Nova Collapse
@@ -203,9 +265,9 @@ local Abilities: { [string]: { [string]: AbilityBalance } } = { -- [characterId]
 
 	Graven = {
 		Ability1 = { Damage = 150, Cooldown = 13, Duration = 2.5, Range = 150, Params = { PullRadius = 40 } }, -- Singularity
-		Ability2 = { Damage = 110, Cooldown = 12, Duration = 2, Range = 35 }, -- Float
-		Ability3 = { Damage = 60, Cooldown = 10, Duration = 4, Range = 150, Params = { GravityMultiplier = 3, SpeedMultiplier = 0.5 } }, -- Weight
-		Ultimate = { Damage = 440, Cooldown = 1, Duration = 6, Range = 120 }, -- Event Horizon
+		Ability2 = { Damage = 130, Cooldown = 11, Duration = 2, Range = 35 }, -- Float
+		Ability3 = { Damage = 90, Cooldown = 10, Duration = 4, Range = 150, Params = { GravityMultiplier = 3, SpeedMultiplier = 0.5 } }, -- Weight
+		Ultimate = { Damage = 400, Cooldown = 1, Duration = 6, Range = 120, Channel = true }, -- Event Horizon
 	},
 
 	Rime = {
@@ -216,8 +278,8 @@ local Abilities: { [string]: { [string]: AbilityBalance } } = { -- [characterId]
 	},
 
 	Swarm = {
-		Ability1 = { Damage = 140, Cooldown = 10, Duration = 1.5, Range = 14 }, -- Nanite Blades
-		Ability2 = { Damage = 60, Cooldown = 12, Duration = 4, Range = 100 }, -- Disassemble
+		Ability1 = { Damage = 140, Cooldown = 10, Duration = 1.5, Range = 14, Channel = true }, -- Nanite Blades
+		Ability2 = { Damage = 100, Cooldown = 11, Duration = 4, Range = 100 }, -- Disassemble
 		Ability3 = { Damage = 0, Cooldown = 14, Duration = 8, Params = { Clones = 2 } }, -- Decoy Mass
 		Ultimate = { Damage = 420, Cooldown = 1, Duration = 6, Range = 110 }, -- Grey Tide
 	},

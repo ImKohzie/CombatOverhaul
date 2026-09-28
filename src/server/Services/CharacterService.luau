@@ -11,8 +11,11 @@ local GameConfig = require(Shared.Config.GameConfig)
 local CharacterRegistry = require(Shared.CharacterRegistry)
 local Validate = require(Shared.Net.Validate)
 
+local CostumeService = require(script.Parent.CostumeService)
 local NetService = require(script.Parent.NetService)
+local PassiveService = require(script.Parent.PassiveService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local StatusService = require(script.Parent.StatusService)
 
 local CharacterService = {}
 
@@ -48,6 +51,25 @@ local function applyCharacter(player: Player, character: Model)
 	character:SetAttribute("ApexCharacter", config.Id)
 	character:SetAttribute("ApexRole", config.Role)
 	character:SetAttribute("ApexDamageReduction", role.DamageReduction)
+	StatusService.clear(character)
+
+	-- Wait for the avatar to finish loading so the costume replaces it cleanly.
+	if not player:HasAppearanceLoaded() then
+		local loaded = false
+		local connection = player.CharacterAppearanceLoaded:Connect(function()
+			loaded = true
+		end)
+		local started = os.clock()
+		while not loaded and os.clock() - started < 5 and character.Parent do
+			task.wait(0.1)
+		end
+		connection:Disconnect()
+	end
+	if character.Parent == nil then
+		return
+	end
+	CostumeService.apply(character, config.Id)
+	PassiveService.start(player, character)
 end
 
 local function selectCharacter(player: Player, characterId: string): (boolean, string?)
