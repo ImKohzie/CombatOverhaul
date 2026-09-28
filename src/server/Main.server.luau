@@ -3,29 +3,22 @@
 
 local Services = script.Parent.Services
 
-local order: { { init: () -> () } } = {
-	require(Services.NetService),
-	require(Services.PlayerStateService),
-	require(Services.StatusService),
-	require(Services.MovementService),
-	require(Services.ReactionService),
-	require(Services.DamageService),
-	require(Services.BeamService),
-	require(Services.CombatService),
-	require(Services.PassiveService),
-	require(Services.CharacterService),
-	require(Services.DestructionService),
-	require(Services.WorldService),
-	require(Services.EnvironmentService),
-	require(Services.NPCService),
-	require(Services.PreviewService),
-	require(Services.AbilityService),
-	require(Services.PerformanceService),
+local names = {
+	"NetService", "PlayerStateService", "StatusService", "MovementService", "ReactionService",
+	"DamageService", "BeamService", "CombatService", "PassiveService", "CharacterService",
+	"DestructionService", "WorldService", "EnvironmentService", "NPCService", "PreviewService",
+	"AbilityService", "PerformanceService",
 }
 
 local started = os.clock()
-for _, service in order do
-	service.init()
+-- One failing service must never stop the others from starting.
+for _, name in names do
+	local ok, err = pcall(function()
+		(require :: any)(Services:FindFirstChild(name)).init()
+	end)
+	if not ok then
+		warn(string.format("[APEX CITY] %s failed to start: %s", name, tostring(err)))
+	end
 end
 print(string.format("[APEX CITY] server ready in %.1f ms", (os.clock() - started) * 1000))
 

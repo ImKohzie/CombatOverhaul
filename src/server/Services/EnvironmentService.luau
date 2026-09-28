@@ -25,9 +25,8 @@ local function ensure(className: string, name: string, configure: (Instance) -> 
 end
 
 local function setupLighting()
-	if Lighting.Technology ~= Enum.Technology.Future then
-		warn("[Environment] Set Lighting.Technology to Future in Studio (it can't be changed by scripts).")
-	end
+	-- Lighting.Technology can't be read or written by game scripts: set it to
+	-- Future in Studio (Lighting > Technology).
 	Lighting.GlobalShadows = true
 	Lighting.EnvironmentDiffuseScale = 1
 	Lighting.EnvironmentSpecularScale = 1

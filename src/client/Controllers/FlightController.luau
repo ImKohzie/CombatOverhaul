@@ -92,11 +92,26 @@ local function getMoveVector(): Vector3
 		local ok, value = pcall(function()
 			return controls:GetMoveVector()
 		end)
-		if ok and typeof(value) == "Vector3" then
+		if ok and typeof(value) == "Vector3" and value.Magnitude > 0.01 then
 			return value
 		end
 	end
-	return Vector3.zero
+	-- Fallback 1: the Humanoid's move direction, converted to camera space
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local camera = workspace.CurrentCamera
+	if humanoid and camera and humanoid.MoveDirection.Magnitude > 0.05 then
+		local look = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
+		local right = Vector3.new(camera.CFrame.RightVector.X, 0, camera.CFrame.RightVector.Z)
+		if look.Magnitude > 1e-3 and right.Magnitude > 1e-3 then
+			local dir = humanoid.MoveDirection
+			return Vector3.new(dir:Dot(right.Unit), 0, -dir:Dot(look.Unit))
+		end
+	end
+	-- Fallback 2: raw keys
+	local x = (if UserInputService:IsKeyDown(Enum.KeyCode.D) then 1 else 0) - (if UserInputService:IsKeyDown(Enum.KeyCode.A) then 1 else 0)
+	local z = (if UserInputService:IsKeyDown(Enum.KeyCode.S) then 1 else 0) - (if UserInputService:IsKeyDown(Enum.KeyCode.W) then 1 else 0)
+	return Vector3.new(x, 0, z)
 end
 
 local function ascendHeld(humanoid: Humanoid): boolean

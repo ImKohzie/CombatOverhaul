@@ -156,11 +156,14 @@ BalanceConfig.Beam = {
 }
 
 BalanceConfig.Momentum = { -- Voltline passive
-	TierTime = 1.5, -- seconds of sustained sprint per tier (tier 4 at ~6s)
-	SpeedMultipliers = { 1, 1.2, 1.45, 1.75 },
-	FovBonus = { 0, 4, 8, 13 },
-	DropGrace = 0.4, -- slowing down for longer than this resets momentum
-	MinSpeedFraction = 0.75, -- of sprint speed to count as "running"
+	TierTime = 0.9, -- seconds of sustained running per tier (tier 4 at ~2.7s)
+	-- Multiplies Voltline's whole move speed (walk and sprint). Agile walk 19,
+	-- sprint x1.6: tier 1 ~41 sprinting, tier 4 ~128 studs/second.
+	SpeedMultipliers = { 1.35, 2.1, 3.0, 4.2 },
+	FovBonus = { 4, 10, 17, 26 },
+	DropGrace = 0.5, -- slowing down for longer than this resets momentum
+	MinSpeedFraction = 0.6, -- of base sprint speed to count as "running"
+	DashMultiplier = 2.5, -- Voltline's dash goes this much further
 }
 
 BalanceConfig.Rage = { -- Rampage passive

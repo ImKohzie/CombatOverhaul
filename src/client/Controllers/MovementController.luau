@@ -97,7 +97,8 @@ local function groundDash()
 	linear.RelativeTo = Enum.ActuatorRelativeTo.World
 	linear.ForceLimitMode = Enum.ForceLimitMode.PerAxis
 	linear.MaxAxesForce = Vector3.new(1e6, 0, 1e6)
-	linear.VectorVelocity = dir * (move.DashDistance / move.DashDuration)
+	local dashScale = if character:GetAttribute("ApexCharacter") == "Voltline" then BalanceConfig.Momentum.DashMultiplier else 1
+	linear.VectorVelocity = dir * (move.DashDistance * dashScale / move.DashDuration)
 	linear.Parent = root
 	task.delay(move.DashDuration, function()
 		linear:Destroy()

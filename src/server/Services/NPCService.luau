@@ -36,7 +36,12 @@ end
 -- Build a plain R15 rig. Used for dummies, clones and decoys.
 function NPCService.createRig(name: string, color: Color3?): Model?
 	local ok, model = pcall(function()
-		return Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+		local description = Instance.new("HumanoidDescription")
+		local players = Players :: any
+		if players.CreateHumanoidModelFromDescriptionAsync then
+			return players:CreateHumanoidModelFromDescriptionAsync(description, Enum.HumanoidRigType.R15)
+		end
+		return players:CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15)
 	end)
 	if not ok or not model then
 		warn("[NPCService] could not create rig: " .. tostring(model))

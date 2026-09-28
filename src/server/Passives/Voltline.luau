@@ -22,17 +22,13 @@ function Voltline.onCharacter(_player: Player, character: Model): () -> ()
 	local slowTime = 0
 	local tier = 1
 
-	local function setTier(newTier: number)
-		if newTier == tier then
+	local function setTier(newTier: number, force: boolean?)
+		if newTier == tier and not force then
 			return
 		end
 		tier = newTier
 		character:SetAttribute("ApexMomentumTier", tier)
-		if tier > 1 then
-			StatusService.apply(character, "Momentum", "Speed", 3600, momentum.SpeedMultipliers[tier])
-		else
-			StatusService.remove(character, "Momentum")
-		end
+		StatusService.apply(character, "Momentum", "Speed", 3600, momentum.SpeedMultipliers[tier])
 	end
 
 	local function reset()
@@ -41,7 +37,7 @@ function Voltline.onCharacter(_player: Player, character: Model): () -> ()
 		setTier(1)
 	end
 
-	character:SetAttribute("ApexMomentumTier", 1)
+	setTier(1, true)
 	local roleSpeed = BalanceConfig.getRole("Agile").WalkSpeed * BalanceConfig.Movement.SprintMultiplier
 
 	local heartbeat = RunService.Heartbeat:Connect(function(dt)
