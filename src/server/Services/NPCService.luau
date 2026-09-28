@@ -105,7 +105,12 @@ function NPCService.init()
 	if not GameConfig.Dummies.Enabled then
 		return
 	end
-	task.defer(function()
+	task.spawn(function()
+		-- Wait for the map so the dummies stand in the training grounds.
+		local waited = 0
+		while workspace:GetAttribute("ApexWorldReady") ~= true and waited < 90 do
+			waited += task.wait(0.5)
+		end
 		for index, role in GameConfig.Dummies.Roles do
 			local x = (index - (#GameConfig.Dummies.Roles + 1) / 2) * 12
 			spawnDummy(role :: any, CFrame.new(x, 3, 0) * CFrame.Angles(0, math.pi, 0))

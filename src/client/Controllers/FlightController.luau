@@ -25,6 +25,7 @@ local Types = require(Shared.Types)
 local CameraController = require(script.Parent.CameraController)
 local EffectsController = require(script.Parent.EffectsController)
 local InputController = require(script.Parent.InputController)
+local MotionModifiers = require(script.Parent.MotionModifiers)
 local PoseController = require(script.Parent.PoseController)
 
 type FlightProfile = BalanceConfig.FlightProfile
@@ -377,7 +378,7 @@ local function step(dt: number)
 	if actual.Magnitude < s.velocity.Magnitude * 0.35 and s.velocity.Magnitude > 20 and os.clock() - s.startedAt > 0.3 then
 		s.velocity = s.velocity:Lerp(actual, 0.5)
 	end
-	s.linear.VectorVelocity = s.velocity
+	s.linear.VectorVelocity = s.velocity + MotionModifiers.total()
 
 	-- Orientation: upright hover -> leaning into travel at speed
 	local currentSpeed = s.velocity.Magnitude

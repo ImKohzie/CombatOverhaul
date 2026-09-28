@@ -21,6 +21,7 @@ require(Controllers.CombatController).init()
 require(Controllers.AbilityInputController).init()
 require(Controllers.BeamController).init()
 require(Controllers.CharacterFx).init()
+require(Controllers.BorderController).init()
 if GameConfig.Debug.ShowDebugHud then
 	require(Controllers.DebugHud).init()
 end
