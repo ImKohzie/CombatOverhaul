@@ -3,7 +3,7 @@
 
 local GameConfig = {}
 
-GameConfig.DefaultCharacter = "Recruit"
+GameConfig.DefaultCharacter = "Sovereign"
 
 GameConfig.Net = {
 	-- Invalid or rate-limited requests add a strike. Too many strikes in the

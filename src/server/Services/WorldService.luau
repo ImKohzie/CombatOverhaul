@@ -103,6 +103,15 @@ function WorldService.init()
 				warn("[World] generation failed: " .. tostring(err))
 			end
 		end
+		local root = workspace:FindFirstChild(MapConfig.ModelName)
+		if root and MapConfig.DisableOtherSpawns then
+			for _, spawn in workspace:GetDescendants() do
+				if spawn:IsA("SpawnLocation") and not spawn:IsDescendantOf(root) and spawn.Enabled then
+					spawn.Enabled = false
+					print("[World] Disabled spawn outside the map: " .. spawn:GetFullName() .. " (MapConfig.DisableOtherSpawns)")
+				end
+			end
+		end
 		startLifts()
 		startTrafficLights()
 		workspace:SetAttribute("ApexWorldReady", true)

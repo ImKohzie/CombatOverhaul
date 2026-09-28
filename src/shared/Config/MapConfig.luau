@@ -9,6 +9,9 @@ MapConfig.Seed = 1947
 MapConfig.Generate = true -- build the map on server start if it isn't in the place yet
 MapConfig.ModelName = "NewHarbor"
 MapConfig.GroundY = 0.1
+-- Disable (not delete) SpawnLocations outside the generated map, so players
+-- spawn around the park fountain instead of inside it.
+MapConfig.DisableOtherSpawns = true
 MapConfig.YieldEvery = 350 -- parts created before yielding a frame during generation
 
 MapConfig.City = {

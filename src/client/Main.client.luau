@@ -27,6 +27,21 @@ require(Controllers.EnvironmentController).init()
 task.spawn(function()
 	require(Controllers.AmbienceController).init()
 end)
+require(Controllers.PerfMonitor).init()
+
+-- HUD
+local UI = script.Parent.UI
+local StarterGui = game:GetService("StarterGui")
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false) -- Tab = character select
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false) -- our own health bar
+end)
+require(UI.Hud).init()
+local hudGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ApexHud")
+require(UI.Minimap).init(hudGui)
+require(UI.KillFeed).init(hudGui)
+require(UI.CharacterSelect).init(hudGui)
+
 if GameConfig.Debug.ShowDebugHud then
 	require(Controllers.DebugHud).init()
 end

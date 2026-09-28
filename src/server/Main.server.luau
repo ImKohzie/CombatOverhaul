@@ -18,7 +18,9 @@ local order: { { init: () -> () } } = {
 	require(Services.WorldService),
 	require(Services.EnvironmentService),
 	require(Services.NPCService),
+	require(Services.PreviewService),
 	require(Services.AbilityService),
+	require(Services.PerformanceService),
 }
 
 local started = os.clock()
