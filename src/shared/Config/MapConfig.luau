@@ -46,7 +46,7 @@ MapConfig.Train = { X = -750, DeckY = 30, PillarSpacing = 50, Cars = 3, Speed = 
 
 MapConfig.Forest = {
 	OuterRadius = 3600, -- terrain extends a little past the border
-	TreeCount = 1500,
+	TreeCount = 0, -- forest trees removed for server performance (was 1500)
 	HillCount = 60,
 	Lake = { X = -2350, Z = -2250, Radius = 190 },
 	River = {

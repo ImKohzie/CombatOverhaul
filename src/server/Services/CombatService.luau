@@ -17,6 +17,7 @@ local Validate = require(Shared.Net.Validate)
 
 local AbilityKit = require(script.Parent.Parent.AbilityKit)
 local BeamService = require(script.Parent.BeamService)
+local TraversalService = require(script.Parent.TraversalService)
 local DamageService = require(script.Parent.DamageService)
 local MovementService = require(script.Parent.MovementService)
 local NetService = require(script.Parent.NetService)
@@ -297,7 +298,9 @@ end
 -- Remote
 --------------------------------------------------------------------------------
 local function onCombatInput(player: Player, action: string, vector: Vector3?)
-	if action == "BeamAim" then
+	if action == "Movement" then
+		TraversalService.handle(player, vector)
+	elseif action == "BeamAim" then
 		if vector then
 			BeamService.updateAim(player, vector)
 		end
@@ -322,7 +325,7 @@ end
 
 function CombatService.init()
 	NetService.onEvent("CombatInput", {
-		Validate.enum({ "M1Down", "Light", "Heavy", "BlockDown", "BlockUp", "BeamAim", "Emote" }),
+		Validate.enum({ "M1Down", "Light", "Heavy", "BlockDown", "BlockUp", "BeamAim", "Emote", "Movement" }),
 		Validate.optional(Validate.vector3(1e6)),
 	}, onCombatInput :: any, { RequireAlive = false })
 

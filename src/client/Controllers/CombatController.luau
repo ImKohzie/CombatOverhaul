@@ -107,8 +107,7 @@ function CombatController.init()
 					PoseController.play(c, "Charge", { Loop = true })
 				end
 			end)
-		elseif action == "FlightOrBlock" then
-			-- Grounded F blocks; airborne F toggles flight (FlightController)
+		elseif action == "Block" then
 			if not airborne() and canAct() then
 				setBlocking(true)
 			end
@@ -138,7 +137,7 @@ function CombatController.init()
 				combatRemote:FireServer("Light")
 				predictSwing("Light")
 			end
-		elseif action == "FlightOrBlock" then
+		elseif action == "Block" then
 			setBlocking(false)
 		end
 	end)

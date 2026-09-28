@@ -166,6 +166,51 @@ BalanceConfig.Momentum = { -- Voltline passive
 	DashMultiplier = 2.5, -- Voltline's dash goes this much further
 }
 
+--------------------------------------------------------------------------------
+-- F: signature movement per character. Speeds are Distance / Duration
+-- (most are 300-500 studs/second bursts).
+--   Kind  Dash   - burst along the camera (flat on the ground)
+--         Flight - flyers: take off with a burst / burst while flying
+--         Leap   - huge ballistic bound
+--         Pull   - yank yourself to the surface under the crosshair
+--         Bounce - dash that ricochets off walls
+--   Phase  - pass through walls, cracking what you pass
+--   Smash  - break through structures in the path
+--------------------------------------------------------------------------------
+export type Traversal = {
+	Name: string,
+	Kind: "Dash" | "Flight" | "Leap" | "Pull" | "Bounce",
+	Distance: number,
+	Duration: number,
+	Cooldown: number,
+	Stamina: number,
+	HitDamage: number,
+	Phase: boolean?,
+	Smash: boolean?,
+	Shatter: boolean?,
+	IceTrail: boolean?,
+	Invisible: boolean?,
+	Unstoppable: boolean?,
+	EndBlast: number?, -- radius of a landing / arrival blast
+	Bounces: number?,
+}
+
+BalanceConfig.Traversal = {
+	Voltline = { Name = "Lightning Dash", Kind = "Dash", Distance = 150, Duration = 0.28, Cooldown = 1.8, Stamina = 12, HitDamage = 25, Phase = true },
+	Sovereign = { Name = "Sonic Launch", Kind = "Flight", Distance = 190, Duration = 0.45, Cooldown = 2.2, Stamina = 14, HitDamage = 35, Smash = true },
+	Argent = { Name = "Cosmic Surge", Kind = "Flight", Distance = 210, Duration = 0.45, Cooldown = 2.2, Stamina = 14, HitDamage = 25, Phase = true },
+	NightwingGoblin = { Name = "Afterburner", Kind = "Flight", Distance = 170, Duration = 0.4, Cooldown = 2.2, Stamina = 14, HitDamage = 30, Smash = true, Shatter = true },
+	Bastion = { Name = "Boulder Rush", Kind = "Dash", Distance = 100, Duration = 0.45, Cooldown = 3, Stamina = 20, HitDamage = 45, Smash = true, Unstoppable = true, EndBlast = 12 },
+	OldGuard = { Name = "Shield Slide", Kind = "Bounce", Distance = 120, Duration = 0.45, Cooldown = 2.5, Stamina = 15, HitDamage = 35, Smash = true, Bounces = 2 },
+	Rampage = { Name = "Wrecking Leap", Kind = "Leap", Distance = 170, Duration = 1, Cooldown = 3, Stamina = 20, HitDamage = 40, Smash = true, EndBlast = 16 },
+	Graven = { Name = "Gravity Sling", Kind = "Pull", Distance = 180, Duration = 0.5, Cooldown = 2.5, Stamina = 15, HitDamage = 25, EndBlast = 12 },
+	Rime = { Name = "Frost Slide", Kind = "Dash", Distance = 140, Duration = 0.38, Cooldown = 2, Stamina = 12, HitDamage = 20, IceTrail = true, Shatter = true },
+	Swarm = { Name = "Disperse", Kind = "Dash", Distance = 120, Duration = 0.32, Cooldown = 2.3, Stamina = 14, HitDamage = 20, Phase = true, Invisible = true },
+	Echo = { Name = "Sonic Hop", Kind = "Dash", Distance = 130, Duration = 0.28, Cooldown = 2, Stamina = 12, HitDamage = 25, Shatter = true, Smash = true },
+	Umbra = { Name = "Shadow Dash", Kind = "Dash", Distance = 120, Duration = 0.28, Cooldown = 2, Stamina = 12, HitDamage = 20, Phase = true, Invisible = true },
+	Recruit = { Name = "Dash", Kind = "Dash", Distance = 60, Duration = 0.3, Cooldown = 2, Stamina = 12, HitDamage = 0 },
+} :: { [string]: Traversal }
+
 BalanceConfig.Rage = { -- Rampage passive
 	GainPerDamageTaken = 0.08, -- rage points per damage point (0..100)
 	DecayPerSecond = 2.5,

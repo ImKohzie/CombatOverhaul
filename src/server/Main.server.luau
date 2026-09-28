@@ -5,7 +5,7 @@ local Services = script.Parent.Services
 
 local names = {
 	"NetService", "PlayerStateService", "StatusService", "MovementService", "ReactionService",
-	"DamageService", "BeamService", "CombatService", "PassiveService", "CharacterService",
+	"DamageService", "BeamService", "TraversalService", "CombatService", "PassiveService", "CharacterService",
 	"DestructionService", "WorldService", "EnvironmentService", "NPCService", "PreviewService",
 	"AbilityService", "PerformanceService",
 }

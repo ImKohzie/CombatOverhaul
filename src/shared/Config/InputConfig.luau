@@ -43,12 +43,21 @@ InputConfig.Actions = {
 		TouchPosition = UDim2.new(1, -250, 1, -170),
 		Sink = true,
 	},
-	FlightOrBlock = {
+	-- F: each character's signature movement (flyers: take off / burst)
+	Movement = {
 		Keys = { Enum.KeyCode.F },
 		Gamepad = { Enum.KeyCode.ButtonB },
 		TouchButton = true,
-		TouchTitle = "Fly/Blk",
+		TouchTitle = "Move",
 		TouchPosition = UDim2.new(1, -170, 1, -230),
+		Sink = true,
+	},
+	Block = {
+		Keys = { Enum.KeyCode.X },
+		Gamepad = { Enum.KeyCode.DPadLeft },
+		TouchButton = true,
+		TouchTitle = "Block",
+		TouchPosition = UDim2.new(1, -330, 1, -110),
 		Sink = true,
 	},
 	Descend = {

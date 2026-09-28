@@ -65,6 +65,8 @@ type Session = {
 	startedAt: number,
 	spinStart: number?,
 	spinAxis: Vector3,
+	burstUntil: number,
+	burstVelocity: Vector3,
 }
 
 local session: Session? = nil
@@ -231,6 +233,8 @@ function FlightController.start()
 		startedAt = os.clock(),
 		spinStart = nil,
 		spinAxis = Vector3.zero,
+		burstUntil = 0,
+		burstVelocity = Vector3.zero,
 	}
 	movementRemote:FireServer("Flight", true)
 	FlightController.Started:Fire()
@@ -288,6 +292,20 @@ function FlightController.stop(impactSpeed: number?)
 		end
 		FlightController.Landed:Fire(impactSpeed, hard)
 	end
+end
+
+-- Signature-movement burst (F): drive the flight at `speed` along `direction`
+-- for `duration` seconds, then settle back to normal flight.
+function FlightController.burst(direction: Vector3, speed: number, duration: number)
+	local s = session
+	if not s or direction.Magnitude < 1e-3 then
+		return
+	end
+	s.burstUntil = os.clock() + duration
+	s.burstVelocity = direction.Unit * speed
+	s.velocity = s.burstVelocity
+	CameraController.shake(0.25)
+	EffectsController.play("SonicBoom", { Position = s.root.Position, Direction = direction.Unit, Color = s.glow })
 end
 
 function FlightController.toggle()
@@ -393,6 +411,9 @@ local function step(dt: number)
 	if actual.Magnitude < s.velocity.Magnitude * 0.35 and s.velocity.Magnitude > 20 and os.clock() - s.startedAt > 0.3 then
 		s.velocity = s.velocity:Lerp(actual, 0.5)
 	end
+	if os.clock() < s.burstUntil then
+		s.velocity = s.burstVelocity
+	end
 	s.linear.VectorVelocity = s.velocity + MotionModifiers.total()
 
 	-- Orientation: upright hover -> leaning into travel at speed
@@ -485,23 +506,6 @@ function FlightController.init()
 		local playerModule = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule", 10)
 		if playerModule then
 			controls = ((require :: any)(playerModule) :: any):GetControls()
-		end
-	end)
-
-	-- F: toggles flight when airborne or already flying; grounded F is block
-	-- (CombatController). Double-jump also takes off.
-	InputController.Began:Connect(function(action: string)
-		if action ~= "FlightOrBlock" or not FlightController.canFly() then
-			return
-		end
-		if session then
-			FlightController.stop(nil)
-			return
-		end
-		local character = player.Character
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if humanoid and humanoid.FloorMaterial == Enum.Material.Air then
-			FlightController.start()
 		end
 	end)
 

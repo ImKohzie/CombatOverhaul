@@ -119,32 +119,6 @@ local function updateMomentum(character: Model, state: State, isLocal: boolean)
 	end
 end
 
--- Local Voltline Phase Run: slip through walls in the movement direction.
-local function phaseThroughWalls(character: Model)
-	local root = rootOf(character)
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not root or not humanoid then
-		return
-	end
-	local move = humanoid.MoveDirection
-	if move.Magnitude < 0.1 then
-		return
-	end
-	local dir = Vector3.new(move.X, 0, move.Z).Unit
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character, EffectsController.folder() }
-	local hit = workspace:Raycast(root.Position, dir * 3.2, params)
-	if not hit or hit.Normal.Y > 0.6 then
-		return
-	end
-	-- Find the far side of the obstacle (up to 40 studs thick)
-	local farStart = root.Position + dir * 42
-	local back = workspace:Raycast(farStart, -dir * 42, params)
-	local exit = if back then back.Position + dir * 2.5 else farStart
-	root.CFrame = CFrame.new(Vector3.new(exit.X, root.Position.Y, exit.Z)) * root.CFrame.Rotation
-end
-
 --------------------------------------------------------------------------------
 -- Status visuals
 --------------------------------------------------------------------------------
@@ -328,10 +302,6 @@ end
 
 local accumulator = 0
 local function step(dt: number)
-	local mine = player.Character
-	if mine and mine:GetAttribute("ApexCharacter") == "Voltline" and mine:GetAttribute("ApexPhasing") == true then
-		phaseThroughWalls(mine)
-	end
 	accumulator += dt
 	if accumulator < 0.1 then
 		return

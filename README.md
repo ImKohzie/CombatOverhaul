@@ -48,8 +48,9 @@ require(game.ServerScriptService.ApexCity.World.WorldBuilder).build()
 |---|---|---|---|
 | Move / jump / ascend | WASD / Space | Left stick / A | Thumbstick / Jump |
 | Sprint / boost | Shift | L3 | Run |
-| Block (ground) / flight (in the air) | F | B | Fly/Blk |
-| Take off | Double-jump, or F while airborne | A, A | Jump, Jump |
+| Signature movement (every character, see below). Flyers: F = launch / burst, double-tap F = drop | F | B | Move |
+| Block | X | D-pad left | Block |
+| Take off (flyers) | Double-jump or F | A, A | Jump, Jump |
 | Descend (flight) | Left Ctrl | R3 | Down |
 | Dash (glider: trick-spin dodge) | C | D-pad right | Dash |
 | Attack: tap = combo, hold = heavy (air: aerial / dive slam) | Left mouse | R2 | Hit |

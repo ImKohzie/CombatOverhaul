@@ -20,9 +20,9 @@ local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
 
-local SLOTS = { "Ability1", "Ability2", "Ability3", "Ultimate" }
-local KEYS = { Ability1 = "Q", Ability2 = "E", Ability3 = "R", Ultimate = "G" }
-local GAMEPAD_KEYS = { Ability1 = "X", Ability2 = "Y", Ability3 = "RB", Ultimate = "LB" }
+local SLOTS = { "Movement", "Ability1", "Ability2", "Ability3", "Ultimate" }
+local KEYS = { Movement = "F", Ability1 = "Q", Ability2 = "E", Ability3 = "R", Ultimate = "G" }
+local GAMEPAD_KEYS = { Movement = "B", Ability1 = "X", Ability2 = "Y", Ability3 = "RB", Ultimate = "LB" }
 
 local Hud = {}
 
@@ -301,8 +301,16 @@ local function update()
 	local gamepad = UserInputService:GetLastInputType().Name:sub(1, 7) == "Gamepad"
 	for _, slotName in SLOTS do
 		local slot = slots[slotName]
-		local def = config and config.Abilities[slotName]
-		local balance = config and BalanceConfig.getAbility(config.Id, slotName)
+		local def: any = nil
+		local balance: any = nil
+		if slotName == "Movement" then
+			local move = config and (BalanceConfig.Traversal :: any)[config.Id]
+			def = move
+			balance = move
+		else
+			def = config and config.Abilities[slotName]
+			balance = config and BalanceConfig.getAbility(config.Id, slotName)
+		end
 		slot.name.Text = if def then def.Name else ""
 		slot.key.Text = if gamepad then GAMEPAD_KEYS[slotName] else KEYS[slotName]
 		local readyAt = player:GetAttribute("ApexCD_" .. slotName)
