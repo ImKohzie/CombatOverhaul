@@ -12,6 +12,7 @@
 
 export type AssetEntry = {
 	Id: number,
+	Content: string?, -- built-in "rbxasset://" content used when Id is 0
 	Kind: "Animation" | "Sound" | "Texture" | "Mesh" | "Decal" | "Model",
 	Status: "Procedural" | "Placeholder" | "Verified",
 	Notes: string,
@@ -20,6 +21,27 @@ export type AssetEntry = {
 local Registry: { [string]: AssetEntry } = {
 	-- Phase 1: pipeline test effect.
 	["VFX.Pulse"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Neon ring + tween, built in EffectsController" },
+
+	-- Phase 2: movement / flight.
+	["Sound.Flight.Wind"] = {
+		Id = 0,
+		Content = "rbxasset://sounds/action_falling.ogg",
+		Kind = "Sound",
+		Status = "Placeholder",
+		Notes = "Built-in Roblox free-fall wind. Looped; volume/pitch scale with flight speed. Swap for a better wind loop.",
+	},
+	["Sound.Flight.Land"] = {
+		Id = 0,
+		Content = "rbxasset://sounds/action_jump_land.mp3",
+		Kind = "Sound",
+		Status = "Placeholder",
+		Notes = "Built-in landing thump, pitched down for hard landings.",
+	},
+	["VFX.SonicBoom"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Expanding neon ring perpendicular to flight direction" },
+	["VFX.Crater"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Scorch disc + rock ring + debris chunks, no decal asset" },
+	["VFX.SpeedLines"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Screen-edge UI streaks in CameraController" },
+	["Model.Board"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Argent chrome board built from parts in MovementService" },
+	["Model.Glider"] = { Id = 0, Kind = "Model", Status = "Procedural", Notes = "Nightwing Goblin glider built from parts in MovementService" },
 }
 
 local AssetRegistry = {}
@@ -28,13 +50,16 @@ function AssetRegistry.get(key: string): AssetEntry?
 	return Registry[key]
 end
 
--- Returns "rbxassetid://<id>" or nil when the entry is missing / placeholder.
+-- Returns "rbxassetid://<id>", the built-in fallback content, or nil.
 function AssetRegistry.contentId(key: string): string?
 	local entry = Registry[key]
-	if entry and entry.Id ~= 0 then
+	if not entry then
+		return nil
+	end
+	if entry.Id ~= 0 then
 		return "rbxassetid://" .. tostring(entry.Id)
 	end
-	return nil
+	return entry.Content
 end
 
 function AssetRegistry.all(): { [string]: AssetEntry }

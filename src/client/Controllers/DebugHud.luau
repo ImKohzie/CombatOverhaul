@@ -126,7 +126,7 @@ local function update()
 	local ult = player:GetAttribute("ApexUltimate") or 0
 	local inCombat = player:GetAttribute("ApexInCombat") == true
 	local lines = {
-		"<b>APEX CITY · Phase 1 debug HUD</b>",
+		"<b>APEX CITY · debug HUD</b>",
 		"Character: " .. (if config then config.DisplayName .. " (" .. config.Role .. ")" else "-"),
 		"HP: " .. hp,
 		string.format("Stamina: %d / %d", stamina :: number, BalanceConfig.Stamina.Max),

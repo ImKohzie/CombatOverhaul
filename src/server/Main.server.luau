@@ -7,6 +7,7 @@ local order: { { init: () -> () } } = {
 	require(Services.NetService),
 	require(Services.PlayerStateService),
 	require(Services.CharacterService),
+	require(Services.MovementService),
 	require(Services.AbilityService),
 }
 

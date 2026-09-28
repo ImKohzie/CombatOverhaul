@@ -112,8 +112,16 @@ end
 -- Fire only to players whose character is within radius of position.
 -- Used for cosmetic effects so far-away clients aren't flooded.
 function NetService.fireNear(name: string, position: Vector3, radius: number, ...: any)
+	NetService.fireNearExcept(name, position, radius, nil, ...)
+end
+
+-- Same as fireNear but skips one player (who already played it locally).
+function NetService.fireNearExcept(name: string, position: Vector3, radius: number, except: Player?, ...: any)
 	local remote = Remotes.event(name)
 	for _, player in Players:GetPlayers() do
+		if player == except then
+			continue
+		end
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") and (root.Position - position).Magnitude <= radius then
