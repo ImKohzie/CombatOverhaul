@@ -59,6 +59,10 @@ require(game.ServerScriptService.ApexCity.World.WorldBuilder).build()
 | Ultimate (meter full) | G | L1 | ULT |
 | Character select | Tab | Select | Characters button |
 | Emote | V | D-pad down | — |
+| Lock on / unlock (enemy nearest the screen centre) | T or middle mouse | D-pad up | Lock |
+| Switch lock-on target | Z | Flick right stick | Next |
+
+While locked on, the camera tracks the target and you strafe around it (hold sprint to run freely). Abilities, beams and F moves aim at the target.
 
 ## Characters
 
@@ -76,6 +80,23 @@ require(game.ServerScriptService.ApexCity.World.WorldBuilder).build()
 | Swarm | Balanced | 1150 | Ground |
 | Echo | Agile | 950 | Ground |
 | Umbra | Agile | 950 | Ground + shadow steps |
+| Cinder | Balanced | 1150 | Flight (fire jets) |
+| Tempest | Agile | 950 | Ground (wind) |
+| Magnus | Bruiser | 1400 | Flight (magnetism) |
+| Rebound | Balanced | 1150 | Ground (rubber pinball) |
+| Hexa | Agile | 950 | Ground (blink) |
+| Thornwild | Tank | 1800 | Ground (vine swing) |
+| Glitch | Agile | 950 | Ground (phase teleports) |
+| Undertow | Balanced | 1150 | Ground (wave ride) |
+
+Every character has a signature F move (dash, flight burst, leap, sling or ricochet) that interacts with buildings, with impact frames on every hit.
+
+### AI rivals
+
+Four AI rival heroes (random characters) roam near the spawn and hunt players.
+- They chase, strafe, dash in, shoot, block, dodge, run combos and a telegraphed slam, and retreat at low health.
+- Your parries work on them.
+- Change the count and difficulty (`Easy` / `Normal` / `Hard`) in `GameConfig.Bots`; their numbers are in `BalanceConfig.Bots`.
 
 ## Tuning
 

@@ -108,6 +108,24 @@ InputConfig.Actions = {
 		TouchPosition = UDim2.new(1, -330, 1, -330),
 		Sink = true,
 	},
+	-- PvP lock-on: lock / unlock the enemy nearest the screen centre
+	LockOn = {
+		Keys = { Enum.KeyCode.T, Enum.UserInputType.MouseButton3 },
+		Gamepad = { Enum.KeyCode.DPadUp },
+		TouchButton = true,
+		TouchTitle = "Lock",
+		TouchPosition = UDim2.new(1, -95, 1, -330),
+		Sink = true,
+	},
+	-- Switch lock-on target (gamepad: flick the right stick)
+	LockSwitch = {
+		Keys = { Enum.KeyCode.Z },
+		Gamepad = {},
+		TouchButton = true,
+		TouchTitle = "Next",
+		TouchPosition = UDim2.new(1, -95, 1, -410),
+		Sink = true,
+	},
 	CharacterSelect = {
 		Keys = { Enum.KeyCode.Tab },
 		Gamepad = { Enum.KeyCode.ButtonSelect },

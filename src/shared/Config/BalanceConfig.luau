@@ -219,6 +219,42 @@ BalanceConfig.Traversal = {
 	Undertow = { Name = "Wave Ride", Kind = "Dash", Distance = 150, Duration = 0.4, Cooldown = 2, Stamina = 12, HitDamage = 30, Smash = true, Shatter = true },
 } :: { [string]: Traversal }
 
+--------------------------------------------------------------------------------
+-- AI rivals (BotService). Difficulty picked by GameConfig.Bots.Difficulty.
+--------------------------------------------------------------------------------
+export type BotProfile = {
+	Reaction: number, -- seconds before reacting to a hit / threat
+	BlockChance: number, -- chance to guard when an enemy is in melee range
+	DodgeChance: number, -- chance to side-dash after being hit
+	AimError: number, -- studs of spread on ranged shots
+	ComboLength: number, -- light hits per string
+	ShotCooldown: number,
+	SlamCooldown: number,
+	DashCooldown: number,
+	DamageScale: number, -- multiplies all bot damage
+}
+
+BalanceConfig.Bots = {
+	Profiles = {
+		Easy = { Reaction = 0.45, BlockChance = 0.15, DodgeChance = 0.1, AimError = 7, ComboLength = 2, ShotCooldown = 4.5, SlamCooldown = 14, DashCooldown = 6, DamageScale = 0.7 },
+		Normal = { Reaction = 0.25, BlockChance = 0.35, DodgeChance = 0.25, AimError = 3.5, ComboLength = 3, ShotCooldown = 3, SlamCooldown = 10, DashCooldown = 4.5, DamageScale = 0.85 },
+		Hard = { Reaction = 0.12, BlockChance = 0.55, DodgeChance = 0.4, AimError = 1.2, ComboLength = 4, ShotCooldown = 2.2, SlamCooldown = 8, DashCooldown = 3, DamageScale = 1 },
+	} :: { [string]: BotProfile },
+	ShotDamage = 55,
+	ShotSpeed = 220,
+	ShotRange = 160,
+	SlamDamage = 90,
+	SlamRadius = 16,
+	DashSpeed = 170,
+	DashTime = 0.35,
+	DashHitDamage = 30,
+	MeleeRange = 7.5,
+	StrafeRange = 24,
+	RetreatHealth = 0.25, -- fraction of HP where rivals back off and kite
+	ChaseSpeedMultiplier = 1.5, -- over the role's walk speed
+	ThreatDecayPerSecond = 15,
+}
+
 BalanceConfig.Rage = { -- Rampage passive
 	GainPerDamageTaken = 0.08, -- rage points per damage point (0..100)
 	DecayPerSecond = 2.5,

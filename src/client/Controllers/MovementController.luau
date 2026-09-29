@@ -16,6 +16,7 @@ local Remotes = require(Shared.Net.Remotes)
 local CameraController = require(script.Parent.CameraController)
 local FlightController = require(script.Parent.FlightController)
 local InputController = require(script.Parent.InputController)
+local LockOnController = require(script.Parent.LockOnController)
 
 local player = Players.LocalPlayer
 
@@ -107,6 +108,27 @@ local function groundDash()
 	movementRemote:FireServer("Dash")
 end
 
+-- Locked on (on foot, not sprinting): face the target and strafe around it.
+local function lockFacing(humanoid: Humanoid, root: BasePart): boolean
+	local target = LockOnController.getTarget()
+	local targetRoot = target and target:FindFirstChild("HumanoidRootPart")
+	if not targetRoot or not targetRoot:IsA("BasePart") or FlightController.isFlying() or InputController.isHeld("Sprint") then
+		return false
+	end
+	local offset = targetRoot.Position - root.Position
+	local flat = Vector3.new(offset.X, 0, offset.Z)
+	if flat.Magnitude < 1 then
+		return false
+	end
+	humanoid.AutoRotate = false
+	local current = root.CFrame.LookVector
+	local look = Vector3.new(current.X, 0, current.Z):Lerp(flat.Unit, 0.35)
+	if look.Magnitude > 1e-3 then
+		root.CFrame = CFrame.lookAt(root.Position, root.Position + look.Unit)
+	end
+	return true
+end
+
 local function step(_dt: number)
 	local character, humanoid, root = getParts()
 	if not character or not humanoid or not root or humanoid.Health <= 0 then
@@ -156,6 +178,8 @@ local function step(_dt: number)
 				root.CFrame = CFrame.lookAt(root.Position, root.Position + flatLook.Unit)
 			end
 		end
+	elseif lockFacing(humanoid, root) then
+		-- strafing around the locked target (handled in lockFacing)
 	elseif not humanoid.AutoRotate then
 		humanoid.AutoRotate = true
 	end

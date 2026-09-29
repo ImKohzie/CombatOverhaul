@@ -48,6 +48,18 @@ GameConfig.Dummies = {
 	RespawnTime = 5,
 }
 
+-- AI rival heroes that roam the city and fight players (and each other).
+GameConfig.Bots = {
+	Enabled = true,
+	Count = 4, -- rivals alive at once (lower for weak servers)
+	RespawnTime = 8,
+	AggroRange = 150, -- studs: start hunting a player
+	BotVsBotRange = 70, -- rivals only fight each other when this close and no players are near
+	LeashRange = 450, -- studs from home before heading back
+	SpawnRadius = 160, -- around the spawn
+	Difficulty = "Normal", -- "Easy" | "Normal" | "Hard"
+}
+
 GameConfig.Debug = {
 	ShowDebugHud = false, -- old Phase 1 debug panel (the real HUD replaces it)
 	PrintBalanceMatrix = true, -- print the TTK matrix to the output on server start

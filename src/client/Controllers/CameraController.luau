@@ -40,6 +40,7 @@ local hitMarkerFrames: { Frame } = {}
 local hitMarkerUntil = 0
 local aimBlocked = false
 local cinematicActive = false
+local lookProvider: ((camera: Camera, dt: number) -> CFrame?)? = nil
 
 --------------------------------------------------------------------------------
 -- Public API
@@ -61,6 +62,12 @@ end
 -- Some states (menus, ragdoll) disable aim mode.
 function CameraController.setAimBlocked(blocked: boolean)
 	aimBlocked = blocked
+end
+
+-- Lock-on: a provider that may override the camera CFrame each frame
+-- (applied after the default camera, before shake).
+function CameraController.setLookProvider(provider: ((camera: Camera, dt: number) -> CFrame?)?)
+	lookProvider = provider
 end
 
 -- intensity 0..1. Stacks as "trauma"; shake strength = trauma^2.
@@ -213,6 +220,15 @@ local function afterCamera(dt: number)
 	target *= 1 + (AIM_ZOOM - 1) * aimBlend
 	currentFov += (target - currentFov) * math.min(1, dt * FOV_SMOOTH)
 	camera.FieldOfView = currentFov
+
+	-- Lock-on tracking
+	local provider = lookProvider
+	if provider and not cinematicActive then
+		local ok, override = pcall(provider, camera, dt)
+		if ok and override then
+			camera.CFrame = override
+		end
+	end
 
 	-- Shake
 	if trauma > 0 then

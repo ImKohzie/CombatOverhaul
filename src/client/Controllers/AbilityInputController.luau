@@ -11,7 +11,9 @@ local Remotes = require(Shared.Net.Remotes)
 local CharacterRegistry = require(Shared.CharacterRegistry)
 local Types = require(Shared.Types)
 
+local CameraController = require(script.Parent.CameraController)
 local InputController = require(script.Parent.InputController)
+local LockOnController = require(script.Parent.LockOnController)
 
 local AIM_DISTANCE = 1000
 
@@ -34,6 +36,11 @@ function AbilityInputController.getAim(): (Vector3?, Vector3?)
 	local camera = workspace.CurrentCamera
 	if not character or not head or not head:IsA("BasePart") or not camera then
 		return nil, nil
+	end
+	-- Locked on (and not free-aiming): aim at the target
+	local locked = LockOnController.aimPoint()
+	if locked and not CameraController.isAiming() then
+		return head.Position, locked
 	end
 	local viewport = camera.ViewportSize
 	local ray = camera:ViewportPointToRay(viewport.X / 2, viewport.Y / 2)
