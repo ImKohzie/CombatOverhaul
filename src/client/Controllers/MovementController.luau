@@ -115,6 +115,10 @@ local function lockFacing(humanoid: Humanoid, root: BasePart): boolean
 	if not targetRoot or not targetRoot:IsA("BasePart") or FlightController.isFlying() or InputController.isHeld("Sprint") then
 		return false
 	end
+	local character = root.Parent
+	if character and (character:GetAttribute("ApexRagdoll") == true or character:GetAttribute("ApexStunned") == true) then
+		return false
+	end
 	local offset = targetRoot.Position - root.Position
 	local flat = Vector3.new(offset.X, 0, offset.Z)
 	if flat.Magnitude < 1 then
