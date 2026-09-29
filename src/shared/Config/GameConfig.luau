@@ -51,7 +51,8 @@ GameConfig.Dummies = {
 -- AI rival heroes that roam the city and fight players (and each other).
 GameConfig.Bots = {
 	Enabled = true,
-	Count = 4, -- rivals alive at once (lower for weak servers)
+	Count = 4, -- rivals the game keeps alive (lower for weak servers)
+	MaxAlive = 10, -- hard cap: never more than this many rivals at once
 	RespawnTime = 8,
 	AggroRange = 150, -- studs: start hunting a player
 	BotVsBotRange = 70, -- rivals only fight each other when this close and no players are near

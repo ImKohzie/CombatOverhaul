@@ -552,9 +552,7 @@ local function heroPool(): { string }
 	return pool
 end
 
-local spawnBot: (slot: number) -> ()
-
-spawnBot = function(slot: number)
+local function spawnBot()
 	local pool = heroPool()
 	if #pool == 0 then
 		return
@@ -631,15 +629,76 @@ spawnBot = function(slot: number)
 	brains[model] = brain
 	effect(home, "TraversalImpact", { Kind = "Blast", Position = home, Direction = Vector3.yAxis, Color = config.Palette.Glow, Source = model, Strength = 0.6 })
 
+	-- Death: clear the body after the respawn delay. The manager loop (not
+	-- this callback) decides when a replacement spawns, so bots can't pile up.
 	humanoid.Died:Connect(function()
 		brains[model] = nil
 		task.delay(GameConfig.Bots.RespawnTime, function()
 			if model.Parent then
 				model:Destroy()
 			end
-			spawnBot(slot)
 		end)
 	end)
+end
+
+-- Every rival currently in the world (alive or not), from ANY copy of this
+-- script - the cap is enforced on what actually exists.
+local function worldBots(): ({ Model }, number)
+	local list: { Model } = {}
+	local living = 0
+	for _, child in NPCService.folder():GetChildren() do
+		if child:IsA("Model") and child:GetAttribute("ApexBot") == true then
+			table.insert(list, child)
+			if alive(child) then
+				living += 1
+			end
+		end
+	end
+	return list, living
+end
+
+-- Keeps the living rival count at GameConfig.Bots.Count, never above
+-- GameConfig.Bots.MaxAlive. Also removes bots that fell out of the map or
+-- lost their parts.
+local function manage()
+	local config = GameConfig.Bots
+	local target = math.min(config.Count, config.MaxAlive)
+	local nextSpawnAt = 0
+	while true do
+		task.wait(1)
+		local list, living = worldBots()
+		for _, model in list do
+			local root = AbilityKit.rootOf(model)
+			if alive(model) and (not root or root.Position.Y < workspace.FallenPartsDestroyHeight + 50) then
+				brains[model] = nil
+				model:Destroy()
+				living -= 1
+			end
+		end
+		-- Over the cap (e.g. duplicated scripts): remove the extras
+		if living > config.MaxAlive then
+			local extra = living - config.MaxAlive
+			for _, model in list do
+				if extra <= 0 then
+					break
+				end
+				if model.Parent and alive(model) then
+					brains[model] = nil
+					model:Destroy()
+					extra -= 1
+				end
+			end
+			living = config.MaxAlive
+		end
+		-- Under target: spawn one at a time, respecting the respawn delay
+		if living < target and os.clock() >= nextSpawnAt and #list < config.MaxAlive + 4 then
+			local ok, err = (pcall :: any)(spawnBot)
+			if not ok then
+				warn("[BotService] spawn failed: " .. tostring(err))
+			end
+			nextSpawnAt = os.clock() + (if living + 1 < target and #list <= living then 0.5 else config.RespawnTime)
+		end
+	end
 end
 
 function BotService.brains(): { [Model]: any }
@@ -653,18 +712,18 @@ function BotService.init()
 		return
 	end
 	DamageService.Damaged:Connect(onDamaged)
+	-- Only one spawner per server, even if the scripts were imported twice
+	if workspace:GetAttribute("ApexBotSpawner") == true then
+		warn("[BotService] another copy is already spawning rivals - is ApexCity imported twice?")
+		return
+	end
+	workspace:SetAttribute("ApexBotSpawner", true)
 	task.spawn(function()
 		local waited = 0
 		while workspace:GetAttribute("ApexWorldReady") ~= true and waited < 120 do
 			waited += task.wait(0.5)
 		end
-		for slot = 1, config.Count do
-			local ok, err = (pcall :: any)(spawnBot, slot)
-			if not ok then
-				warn("[BotService] spawn failed: " .. tostring(err))
-			end
-			task.wait(0.3)
-		end
+		manage()
 	end)
 	-- One loop drives every brain; each thinks at TICK rate.
 	local accumulator = 0
