@@ -20,7 +20,8 @@ balance = balance.replace("--!strict", "--!nonstrict")
 sim = load("src/shared/BalanceSim.luau").replace("--!strict", "--!nonstrict")
 
 ids = ["Bastion", "Voltline", "OldGuard", "Sovereign", "Rampage", "NightwingGoblin",
-       "Argent", "Graven", "Rime", "Swarm", "Echo", "Umbra"]
+       "Argent", "Graven", "Rime", "Swarm", "Echo", "Umbra",
+       "Cinder", "Tempest", "Magnus", "Rebound", "Hexa", "Thornwild", "Glitch", "Undertow"]
 script = f"""
 Vector3 = {{ new = function(x, y, z) return {{ X = x, Y = y, Z = z }} end }}
 local BalanceConfig = (function()

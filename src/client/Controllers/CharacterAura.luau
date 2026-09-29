@@ -212,6 +212,68 @@ builders.Argent = function(character)
 	end, 0.8)
 end
 
+-- Cinder: embers circling like a small sun
+builders.Cinder = function(character)
+	return orbiters(character, 5, 2.2, 0.4, 2.6, function()
+		local ember = fxPart(Vector3.new(0.3, 0.3, 0.3), Color3.fromRGB(255, 150, 40), Enum.Material.Neon, Enum.PartType.Ball)
+		local light = Instance.new("PointLight")
+		light.Color = Color3.fromRGB(255, 140, 40)
+		light.Range = 5
+		light.Brightness = 1.2
+		light.Parent = ember
+		return ember
+	end, 0.9)
+end
+
+-- Tempest: fast wind streaks
+builders.Tempest = function(character)
+	return orbiters(character, 4, 2.4, 0, 5, function()
+		local streak = fxPart(Vector3.new(0.08, 0.08, 1.6), Color3.fromRGB(225, 250, 248), Enum.Material.Neon)
+		streak.Transparency = 0.4
+		return streak
+	end, 1.6)
+end
+
+-- Magnus: scrap metal held in orbit
+builders.Magnus = function(character)
+	return orbiters(character, 6, 2.8, 0.8, 1.2, function(i)
+		local size = 0.3 + (i % 3) * 0.15
+		return fxPart(Vector3.new(size, size * 0.6, size * 1.3), Color3.fromRGB(120, 120, 128), Enum.Material.CorrodedMetal)
+	end, 0.6)
+end
+
+-- Hexa: slow-turning rune sigils
+builders.Hexa = function(character)
+	return orbiters(character, 3, 2, 1.6, 0.8, function()
+		local sigil = fxPart(Vector3.new(0.05, 0.7, 0.7), Color3.fromRGB(200, 120, 255), Enum.Material.Neon)
+		sigil.Transparency = 0.3
+		return sigil
+	end, 0.3)
+end
+
+-- Thornwild: drifting leaves
+builders.Thornwild = function(character)
+	return orbiters(character, 5, 2.8, 0.6, 0.9, function()
+		return fxPart(Vector3.new(0.5, 0.05, 0.35), Color3.fromRGB(90, 150, 50), Enum.Material.LeafyGrass)
+	end, 1)
+end
+
+-- Glitch: jittery pixels
+builders.Glitch = function(character)
+	return orbiters(character, 6, 1.9, 0.4, 4, function(i)
+		return fxPart(Vector3.new(0.22, 0.22, 0.22), if i % 2 == 0 then Color3.fromRGB(0, 255, 170) else Color3.fromRGB(255, 40, 200), Enum.Material.Neon)
+	end, 1.4)
+end
+
+-- Undertow: orbiting water droplets
+builders.Undertow = function(character)
+	return orbiters(character, 4, 2.1, 0.5, 1.8, function()
+		local drop = fxPart(Vector3.new(0.4, 0.4, 0.4), Color3.fromRGB(90, 190, 255), Enum.Material.Glass, Enum.PartType.Ball)
+		drop.Transparency = 0.2
+		return drop
+	end, 0.8)
+end
+
 -- Echo: sound-wave rings pulsing from the chest
 builders.Echo = function(character)
 	local nextPulse = 0
@@ -284,6 +346,11 @@ end
 
 builders.Rampage = function(character)
 	return pulse(character, Color3.fromRGB(60, 160, 40), Color3.fromRGB(190, 255, 110), 4, true)
+end
+
+-- Rebound: springy glow pulse
+builders.Rebound = function(character)
+	return pulse(character, Color3.fromRGB(230, 170, 30), Color3.fromRGB(255, 250, 160), 7)
 end
 
 -- Umbra: shadow tendrils curling from the body to the ground

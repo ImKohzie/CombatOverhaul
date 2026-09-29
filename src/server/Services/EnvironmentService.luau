@@ -29,7 +29,17 @@ local function setupLighting()
 	-- Future in Studio (Lighting > Technology).
 	Lighting.GlobalShadows = true
 	Lighting.EnvironmentDiffuseScale = 1
-	Lighting.EnvironmentSpecularScale = 1
+	Lighting.EnvironmentSpecularScale = 1 -- glass / metal reflect the sky
+	-- Photoreal look: physically based light falloff, crisp sun shadows,
+	-- slight exposure lift for the filmic grade below.
+	pcall(function()
+		local lighting: any = Lighting
+		lighting.LightingStyle = Enum.LightingStyle.Realistic
+		lighting.PrioritizeLightingQuality = true
+	end)
+	Lighting.ShadowSoftness = 0.08
+	Lighting.ExposureCompensation = 0.15
+	Lighting.GeographicLatitude = 41 -- New York sun path
 	ensure("Atmosphere", "ApexAtmosphere", function(instance)
 		local atmosphere = instance :: Atmosphere
 		atmosphere.Density = GameConfig.Environment.CityAtmosphereDensity
@@ -41,20 +51,22 @@ local function setupLighting()
 	end)
 	ensure("BloomEffect", "ApexBloom", function(instance)
 		local bloom = instance :: BloomEffect
-		bloom.Intensity = 0.7
-		bloom.Size = 26
-		bloom.Threshold = 1.35
+		bloom.Intensity = 0.55
+		bloom.Size = 30
+		bloom.Threshold = 1.6
 	end)
 	ensure("ColorCorrectionEffect", "ApexGrade", function(instance)
 		local grade = instance :: ColorCorrectionEffect
-		grade.Contrast = 0.08
-		grade.Saturation = 0.06
-		grade.TintColor = Color3.fromRGB(255, 250, 244)
+		-- Filmic grade: deeper contrast, slightly muted, warm highlights
+		grade.Contrast = 0.14
+		grade.Saturation = -0.04
+		grade.Brightness = 0.01
+		grade.TintColor = Color3.fromRGB(255, 248, 238)
 	end)
 	ensure("SunRaysEffect", "ApexSunRays", function(instance)
 		local rays = instance :: SunRaysEffect
-		rays.Intensity = 0.06
-		rays.Spread = 0.75
+		rays.Intensity = 0.09
+		rays.Spread = 0.6
 	end)
 	ensure("DepthOfFieldEffect", "ApexDepthOfField", function(instance)
 		local dof = instance :: DepthOfFieldEffect
@@ -71,7 +83,7 @@ local AMBIENT_KEYS: { AmbientKey } = {
 	{ t = 0, ambient = Color3.fromRGB(30, 34, 52), outdoor = Color3.fromRGB(40, 46, 70) },
 	{ t = 5.5, ambient = Color3.fromRGB(46, 44, 60), outdoor = Color3.fromRGB(70, 64, 80) },
 	{ t = 7, ambient = Color3.fromRGB(110, 96, 90), outdoor = Color3.fromRGB(150, 130, 120) },
-	{ t = 12, ambient = Color3.fromRGB(128, 128, 132), outdoor = Color3.fromRGB(150, 150, 156) },
+	{ t = 12, ambient = Color3.fromRGB(96, 98, 104), outdoor = Color3.fromRGB(132, 134, 142) }, -- lower fill = deeper, more realistic shadows
 	{ t = 17.5, ambient = Color3.fromRGB(120, 100, 90), outdoor = Color3.fromRGB(160, 120, 100) },
 	{ t = 19, ambient = Color3.fromRGB(50, 48, 66), outdoor = Color3.fromRGB(70, 66, 90) },
 	{ t = 24, ambient = Color3.fromRGB(30, 34, 52), outdoor = Color3.fromRGB(40, 46, 70) },
@@ -104,7 +116,7 @@ local function dayNight()
 			Lighting.Ambient = ambient
 			Lighting.OutdoorAmbient = outdoor
 			local night = clock < env.DawnClockTime or clock > env.DuskClockTime
-			Lighting.Brightness = if night then 1.2 else 2.6
+			Lighting.Brightness = if night then 1.2 else 3.2
 			if workspace:GetAttribute("ApexNight") ~= night then
 				workspace:SetAttribute("ApexNight", night)
 			end

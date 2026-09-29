@@ -37,6 +37,9 @@ type ShellStyle = {
 	pillarColor: Color3,
 	slabColor: Color3,
 	windowStyle: "None" | "Grid" | "Bands",
+	trimColor: Color3, -- sills, lintels, ledges, parapet coping
+	trimMaterial: Enum.Material,
+	curtainWall: boolean?, -- skyscraper mullions + spandrels
 	lightChance: number,
 	pillars: boolean, -- corner pillars per band (false = load-bearing walls)
 	sideWindows: boolean, -- windows on the side walls too (row houses: no)
@@ -57,8 +60,37 @@ local BRICK_TONES = {
 	Color3.fromRGB(96, 58, 50), Color3.fromRGB(150, 104, 78),
 }
 
+local SANDSTONE_TONES = {
+	Color3.fromRGB(122, 86, 66), Color3.fromRGB(104, 74, 60), Color3.fromRGB(136, 100, 78),
+}
+-- Midrise facade finishes: material + tones that read as real stone / render
+local FACADES: { { material: Enum.Material, tones: { Color3 } } } = {
+	{ material = Enum.Material.Concrete, tones = CONCRETE_TONES },
+	{ material = Enum.Material.Limestone, tones = { Color3.fromRGB(214, 204, 184), Color3.fromRGB(196, 188, 172), Color3.fromRGB(226, 218, 200) } },
+	{ material = Enum.Material.Plaster, tones = { Color3.fromRGB(222, 214, 198), Color3.fromRGB(190, 170, 146), Color3.fromRGB(168, 176, 172) } },
+	{ material = Enum.Material.Sandstone, tones = { Color3.fromRGB(200, 170, 130), Color3.fromRGB(180, 150, 116) } },
+	{ material = Enum.Material.Brick, tones = BRICK_TONES },
+}
+local STONE_TRIM = Color3.fromRGB(206, 198, 182)
+local DARK_METAL = Color3.fromRGB(38, 40, 44)
+local GRANITE = Color3.fromRGB(62, 60, 60)
+
 local function pick<T>(rng: Random, list: { T }): T
 	return list[rng:NextInteger(1, #list)]
+end
+
+-- Per-panel weathering: real facades are never one flat colour.
+local function weathered(rng: Random, color: Color3): Color3
+	local dirt = rng:NextNumber(0, 0.09)
+	local fade = rng:NextNumber(0, 0.04)
+	return color:Lerp(Color3.fromRGB(40, 36, 32), dirt):Lerp(Color3.new(1, 1, 1), fade)
+end
+
+-- A decor strip that casts a shadow (ledges, sills) so facades get depth.
+local function ledge(parent: Instance, size: Vector3, cframe: CFrame, color: Color3, material: Enum.Material): Part
+	local part = Builder.decor(parent, "Ledge", size, cframe, color, material)
+	part.CastShadow = true
+	return part
 end
 
 -- Windows on a wall panel (decor children of the chunk).
@@ -70,8 +102,11 @@ local function addWindows(panel: Part, style: ShellStyle, rng: Random, floors: n
 	if style.windowStyle == "Bands" then
 		for f = 0, floors - 1 do
 			local y = -size.Y / 2 + style.floorHeight * (f + 0.55)
-			local band = Builder.decor(panel, "Window", Vector3.new(size.X - 1.2, style.floorHeight * 0.45, 0.2), panel.CFrame * CFrame.new(0, y, 0) + outward * (size.Z / 2 + 0.05), Color3.fromRGB(52, 64, 78), Enum.Material.Glass)
-			band.Reflectance = 0.25
+			local band = Builder.decor(panel, "Window", Vector3.new(size.X - 1.2, style.floorHeight * 0.45, 0.2), panel.CFrame * CFrame.new(0, y, 0) + outward * (size.Z / 2 + 0.05), Color3.fromRGB(46, 58, 70), Enum.Material.Glass)
+			band.Reflectance = 0.38
+			-- Dark aluminium head frame + a stone string course per floor
+			Builder.decor(panel, "WindowFrame", Vector3.new(size.X - 1, 0.5, 0.35), panel.CFrame * CFrame.new(0, y + style.floorHeight * 0.245, 0) + outward * (size.Z / 2 + 0.1), DARK_METAL, Enum.Material.Metal)
+			ledge(panel, Vector3.new(size.X, 0.7, 1), panel.CFrame * CFrame.new(0, -size.Y / 2 + style.floorHeight * f + 0.35, 0) + outward * (size.Z / 2 + 0.4), style.trimColor, style.trimMaterial)
 			if rng:NextNumber() < style.lightChance then
 				Builder.tag(band, "ApexWindowLight")
 			end
@@ -83,8 +118,12 @@ local function addWindows(panel: Part, style: ShellStyle, rng: Random, floors: n
 			local y = -size.Y / 2 + style.floorHeight * (f + 0.5)
 			for c = 0, columns - 1 do
 				local x = -size.X / 2 + spacing * (c + 0.5)
-				local window = Builder.decor(panel, "Window", Vector3.new(spacing * 0.5, style.floorHeight * 0.55, 0.2), panel.CFrame * CFrame.new(x, y, 0) + outward * (size.Z / 2 + 0.05), Color3.fromRGB(40, 48, 58), Enum.Material.Glass)
-				window.Reflectance = 0.3
+				local w, h = spacing * 0.5, style.floorHeight * 0.55
+				local window = Builder.decor(panel, "Window", Vector3.new(w, h, 0.2), panel.CFrame * CFrame.new(x, y, 0) + outward * (size.Z / 2 + 0.05), Color3.fromRGB(34, 42, 52), Enum.Material.Glass)
+				window.Reflectance = 0.35
+				-- Stone sill + lintel (classic brownstone / pre-war detailing)
+				ledge(panel, Vector3.new(w + 1.2, 0.5, 0.9), panel.CFrame * CFrame.new(x, y - h / 2 - 0.25, 0) + outward * (size.Z / 2 + 0.35), style.trimColor, style.trimMaterial)
+				Builder.decor(panel, "Lintel", Vector3.new(w + 1, 0.8, 0.45), panel.CFrame * CFrame.new(x, y + h / 2 + 0.4, 0) + outward * (size.Z / 2 + 0.15), style.trimColor, style.trimMaterial)
 				if rng:NextNumber() < style.lightChance then
 					Builder.tag(window, "ApexWindowLight")
 				end
@@ -142,25 +181,40 @@ local function shell(model: Model, spec: BuildingSpec, style: ShellStyle, rng: R
 					continue
 				end
 				local cf = base * side.offset * CFrame.new(x, y0 + 1 + h / 2 - 0.5, 0)
-				local panel = Builder.chunk(model, Vector3.new(panelWidth - 0.1, h - 1, t), cf, style.wallColor, style.wallMaterial, style.wallKind, spec.Id, isGround)
+				local panel = Builder.chunk(model, Vector3.new(panelWidth - 0.1, h - 1, t), cf, weathered(rng, style.wallColor), style.wallMaterial, style.wallKind, spec.Id, isGround)
 				panel.Transparency = style.transparency
 				panel.Reflectance = style.reflectance
+				local outward = (base * side.offset).LookVector * -1
+				if style.curtainWall then
+					-- Mullion fins at the panel edges + a spandrel band per floor
+					for _, edge in { -1, 1 } do
+						Builder.decor(panel, "Mullion", Vector3.new(0.45, h - 1, 0.9), cf * CFrame.new(edge * (panelWidth / 2 - 0.25), 0, 0) + outward * (t / 2 + 0.4), DARK_METAL, Enum.Material.Metal)
+					end
+					for f = 1, floorsHere - 1 do
+						Builder.decor(panel, "Spandrel", Vector3.new(panelWidth - 0.1, 1.6, 0.3), cf * CFrame.new(0, -h / 2 + style.floorHeight * f, 0) + outward * (t / 2 + 0.15), DARK_METAL, Enum.Material.Metal)
+					end
+				end
+				if isGround and side.front then
+					-- Polished granite base course along the street
+					ledge(panel, Vector3.new(panelWidth, 3, 0.6), cf * CFrame.new(0, -h / 2 + 1.5, 0) + outward * (t / 2 + 0.3), GRANITE, Enum.Material.Granite)
+				end
 				if style.wallKind == "Glass" and rng:NextNumber() < style.lightChance then
 					Builder.tag(panel, "ApexWindowLight")
 				end
 				if side.windows then
-					addWindows(panel, style, rng, floorsHere, (base * side.offset).LookVector * -1)
+					addWindows(panel, style, rng, floorsHere, outward)
 				end
 			end
 		end
 
 		if b == bands - 1 then
-			local top = Builder.chunk(model, Vector3.new(width, 1.2, depth), base * CFrame.new(0, y0 + h + 0.6, 0), style.slabColor, Enum.Material.Concrete, "Concrete", spec.Id, false)
+			local top = Builder.chunk(model, Vector3.new(width, 1.2, depth), base * CFrame.new(0, y0 + h + 0.6, 0), Color3.fromRGB(58, 58, 60), Enum.Material.Asphalt, "Concrete", spec.Id, false)
 			top.Name = "Roof"
 			roof = top
 			-- Parapet
 			for _, side in sides do
-				Builder.decor(top, "Parapet", Vector3.new(side.length, 2.5, 0.8), base * side.offset * CFrame.new(0, y0 + h + 2.4, -t / 2 + 0.4), style.slabColor, Enum.Material.Concrete)
+				Builder.decor(top, "Parapet", Vector3.new(side.length, 2.5, 0.8), base * side.offset * CFrame.new(0, y0 + h + 2.4, -t / 2 + 0.4), style.wallColor, style.wallMaterial)
+				ledge(top, Vector3.new(side.length + 0.4, 0.4, 1.3), base * side.offset * CFrame.new(0, y0 + h + 3.85, -t / 2 + 0.4), style.trimColor, style.trimMaterial) -- coping
 			end
 		end
 	end
@@ -203,12 +257,15 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			wallColor = pick(rng, GLASS_TINTS),
 			wallMaterial = Enum.Material.Glass,
 			wallKind = "Glass",
-			transparency = 0.25,
-			reflectance = 0.2,
+			transparency = 0.18,
+			reflectance = 0.4,
 			pillarKind = "Steel",
 			pillarColor = Color3.fromRGB(70, 74, 80),
 			slabColor = Color3.fromRGB(120, 122, 124),
 			windowStyle = "None",
+			trimColor = DARK_METAL,
+			trimMaterial = Enum.Material.Metal,
+			curtainWall = true,
 			lightChance = 0.45,
 			pillars = true,
 			sideWindows = false,
@@ -229,20 +286,23 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			end
 		end
 	elseif spec.Kind == "Midrise" then
+		local facade = pick(rng, FACADES)
 		local style: ShellStyle = {
 			floorHeight = 12,
 			floorsPerBand = 2,
 			panelWidth = 30,
 			wallThickness = 1.5,
-			wallColor = pick(rng, CONCRETE_TONES),
-			wallMaterial = Enum.Material.Concrete,
-			wallKind = "Concrete",
+			wallColor = pick(rng, facade.tones),
+			wallMaterial = facade.material,
+			wallKind = if facade.material == Enum.Material.Brick then "Brick" else "Concrete",
 			transparency = 0,
 			reflectance = 0,
 			pillarKind = "Concrete",
 			pillarColor = Color3.fromRGB(140, 136, 130),
 			slabColor = Color3.fromRGB(130, 128, 124),
 			windowStyle = "Bands",
+			trimColor = if facade.material == Enum.Material.Limestone then Color3.fromRGB(170, 164, 150) else STONE_TRIM,
+			trimMaterial = Enum.Material.Limestone,
 			lightChance = 0.4,
 			pillars = true,
 			sideWindows = spec.Height > 70,
@@ -256,13 +316,14 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			end
 		end
 	elseif spec.Kind == "Brownstone" then
+		local sandstone = rng:NextNumber() < 0.4 -- true brownstone vs red brick
 		local style: ShellStyle = {
 			floorHeight = 11,
 			floorsPerBand = 1,
 			panelWidth = 34,
 			wallThickness = 1.5,
-			wallColor = pick(rng, BRICK_TONES),
-			wallMaterial = Enum.Material.Brick,
+			wallColor = if sandstone then pick(rng, SANDSTONE_TONES) else pick(rng, BRICK_TONES),
+			wallMaterial = if sandstone then Enum.Material.Sandstone else Enum.Material.Brick,
 			wallKind = "Brick",
 			transparency = 0,
 			reflectance = 0,
@@ -270,6 +331,8 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			pillarColor = Color3.fromRGB(90, 60, 50),
 			slabColor = Color3.fromRGB(110, 104, 98),
 			windowStyle = "Grid",
+			trimColor = STONE_TRIM,
+			trimMaterial = Enum.Material.Limestone,
 			lightChance = 0.35,
 			pillars = false,
 			sideWindows = false,
@@ -304,7 +367,7 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			panelWidth = 20,
 			wallThickness = 1.5,
 			wallColor = if spec.Kind == "Warehouse" then Color3.fromRGB(110, 118, 124) else pick(rng, CONCRETE_TONES),
-			wallMaterial = if spec.Kind == "Warehouse" then Enum.Material.CorrodedMetal else Enum.Material.Concrete,
+			wallMaterial = if spec.Kind == "Warehouse" then Enum.Material.CorrodedMetal elseif spec.Kind == "Plain" then Enum.Material.Plaster else Enum.Material.Concrete,
 			wallKind = if spec.Kind == "Warehouse" then "Steel" else "Concrete",
 			transparency = 0,
 			reflectance = 0,
@@ -312,6 +375,8 @@ function BuildingKit.build(parent: Instance, spec: BuildingSpec): Model
 			pillarColor = Color3.fromRGB(80, 80, 84),
 			slabColor = Color3.fromRGB(120, 118, 114),
 			windowStyle = if spec.Kind == "Plain" then "Bands" else "None",
+			trimColor = if spec.Kind == "Warehouse" then DARK_METAL else STONE_TRIM,
+			trimMaterial = if spec.Kind == "Warehouse" then Enum.Material.Metal else Enum.Material.Concrete,
 			lightChance = 0.3,
 			pillars = spec.Kind ~= "Plain",
 			sideWindows = false,

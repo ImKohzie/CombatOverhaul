@@ -337,9 +337,10 @@ local function iceSpike(payload: { [string]: any })
 	local height = num(payload.Height, 7)
 	for i = 1, 3 do
 		local spike = EffectsController.part()
-		spike.Material = Enum.Material.Ice
-		spike.Color = Color3.fromRGB(185, 235, 255)
-		spike.Transparency = 0.15
+		-- Optional Color/Material: thorns, coral, crystal... (default ice)
+		spike.Material = if typeof(payload.Material) == "EnumItem" then (payload.Material :: any) else Enum.Material.Ice
+		spike.Color = if typeof(payload.Color) == "Color3" then payload.Color else Color3.fromRGB(185, 235, 255)
+		spike.Transparency = if spike.Material == Enum.Material.Ice then 0.15 else 0
 		local h = height * (0.6 + math.random() * 0.5)
 		spike.Size = Vector3.new(1.4 + math.random(), h, 1.4 + math.random())
 		local tilt = CFrame.Angles(math.rad(math.random(-18, 18)), math.random() * 6, math.rad(math.random(-18, 18)))

@@ -643,6 +643,230 @@ builders.Umbra = function(character, palette)
 	glowLight(character, "Head", palette.Glow, 7, 0.9)
 end
 
+-- ===== Second wave =====
+
+builders.Cinder = function(character, palette)
+	baseSuit(character, palette, Enum.Material.Basalt)
+	armorKit(character, { plate = Color3.fromRGB(40, 30, 28), material = Enum.Material.Slate, trim = palette.Glow, shoulders = 0.9, belt = DARK })
+	-- Molten veins across the body
+	for _, limb in { "LeftUpperArm", "RightUpperArm", "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg" } do
+		neon(character, limb, Vector3.new(0.08, 1, 0.05), CFrame.new(-0.15, 0, -0.52) * CFrame.Angles(0, 0, math.rad(-20)), palette.Glow)
+	end
+	neon(character, "UpperTorso", Vector3.new(0.5, 0.5, 0.1), CFrame.new(0, 0.25, -0.72) * CFrame.Angles(0, 0, math.rad(45)), palette.Glow)
+	-- Flame "hair": stacked glowing wedges
+	for i = 0, 3 do
+		local flame = neon(character, "Head", Vector3.new(0.9 - i * 0.18, 0.45, 0.9 - i * 0.18), CFrame.new(0, 0.7 + i * 0.3, 0.05 + i * 0.08) * CFrame.Angles(math.rad(-12), math.rad(i * 25), 0), if i % 2 == 0 then palette.Glow else Color3.fromRGB(255, 220, 90))
+		if flame then
+			flame.Transparency = 0.1 + i * 0.12
+		end
+	end
+	eyes(character, Color3.fromRGB(255, 230, 120), 0.1)
+	emitter(character, "UpperTorso", {
+		Color = ColorSequence.new(Color3.fromRGB(255, 220, 90), Color3.fromRGB(255, 70, 20)),
+		LightEmission = 1,
+		Size = NumberSequence.new(0.6, 0),
+		Lifetime = NumberRange.new(0.3, 0.6),
+		Speed = NumberRange.new(2, 5),
+		SpreadAngle = Vector2.new(35, 35),
+		Acceleration = Vector3.new(0, 12, 0),
+		EmissionDirection = Enum.NormalId.Top,
+		Rate = 35,
+	})
+	for _, hand in { "LeftHand", "RightHand" } do
+		emitter(character, hand, {
+			Color = ColorSequence.new(Color3.fromRGB(255, 200, 80), Color3.fromRGB(255, 60, 10)),
+			LightEmission = 1,
+			Size = NumberSequence.new(0.5, 0),
+			Lifetime = NumberRange.new(0.2, 0.4),
+			Speed = NumberRange.new(1, 3),
+			Acceleration = Vector3.new(0, 10, 0),
+			Rate = 25,
+		})
+	end
+	glowLight(character, "UpperTorso", palette.Glow, 14, 1.4)
+end
+
+builders.Tempest = function(character, palette)
+	baseSuit(character, palette, Enum.Material.Fabric)
+	paint(character, LIMBS.Arms, palette.Secondary, Enum.Material.Fabric)
+	armorKit(character, { plate = palette.Secondary, material = Enum.Material.SmoothPlastic, trim = palette.Glow, shoulders = 0.7, belt = palette.Secondary, gauntlets = true, boots = true })
+	helmet(character, palette.Primary, Enum.Material.SmoothPlastic, palette.Glow)
+	-- Swept wind fins on the helmet and shoulders
+	for _, side in { -1, 1 } do
+		attach(character, "Head", Vector3.new(0.1, 0.35, 1.3), CFrame.new(side * 0.68, 0.3, 0.45) * CFrame.Angles(math.rad(25), 0, 0), palette.Glow, Enum.Material.Neon)
+		attach(character, if side < 0 then "LeftUpperArm" else "RightUpperArm", Vector3.new(0.1, 0.3, 1.2), CFrame.new(side * 0.55, 0.5, 0.35) * CFrame.Angles(math.rad(30), 0, 0), palette.Glow, Enum.Material.Neon)
+	end
+	-- Long flowing scarf
+	cape(character, palette.Glow:Lerp(palette.Secondary, 0.4), Enum.Material.Fabric, 4, 0.8, 5, CFrame.new(0.4, 0.9, 0.55))
+	emitter(character, "LowerTorso", {
+		Color = ColorSequence.new(Color3.fromRGB(230, 250, 250)),
+		Transparency = NumberSequence.new(0.6, 1),
+		Size = NumberSequence.new(0.3, 1.4),
+		Lifetime = NumberRange.new(0.5, 0.9),
+		Speed = NumberRange.new(6, 10),
+		SpreadAngle = Vector2.new(180, 10),
+		Rate = 14,
+	})
+	glowLight(character, "UpperTorso", palette.Glow, 8, 0.7)
+end
+
+builders.Magnus = function(character, palette)
+	scale(character, 1.1)
+	baseSuit(character, palette, Enum.Material.Fabric)
+	paint(character, LIMBS.Arms, palette.Secondary, Enum.Material.Fabric)
+	armorKit(character, { plate = palette.Primary:Lerp(Color3.new(0, 0, 0), 0.25), material = Enum.Material.Metal, reflectance = 0.2, trim = palette.Glow, shoulders = 1.3, belt = palette.Secondary })
+	-- Horseshoe-magnet crest helmet (original design: split horns with glowing poles)
+	helmet(character, palette.Primary, Enum.Material.Metal, palette.Glow)
+	for _, side in { -1, 1 } do
+		attach(character, "Head", Vector3.new(0.35, 0.9, 0.35), CFrame.new(side * 0.45, 0.8, 0), palette.Secondary, Enum.Material.Metal)
+		neon(character, "Head", Vector3.new(0.37, 0.25, 0.37), CFrame.new(side * 0.45, 1.3, 0), palette.Glow)
+	end
+	cape(character, palette.Primary, Enum.Material.Fabric, 5, 2.4, 6.2, CFrame.new(0, 0.85, 0.6))
+	-- Orbiting scrap bits (particles)
+	emitter(character, "UpperTorso", {
+		Color = ColorSequence.new(Color3.fromRGB(140, 140, 150)),
+		Size = NumberSequence.new(0.2, 0.1),
+		Lifetime = NumberRange.new(1, 1.6),
+		Speed = NumberRange.new(1, 2),
+		RotSpeed = NumberRange.new(-200, 200),
+		SpreadAngle = Vector2.new(180, 180),
+		Rate = 10,
+	})
+	glowLight(character, "Head", palette.Glow, 9, 1)
+end
+
+builders.Rebound = function(character, palette)
+	baseSuit(character, palette, Enum.Material.Rubber)
+	paint(character, LIMBS.Hands, palette.Secondary, Enum.Material.Rubber)
+	paint(character, LIMBS.Feet, palette.Secondary, Enum.Material.Rubber)
+	paint(character, { "LowerTorso" }, palette.Secondary, Enum.Material.Rubber)
+	-- Big goggles and a rubber-ball chest emblem (original)
+	attach(character, "Head", Vector3.new(1.3, 0.4, 0.3), CFrame.new(0, 0.18, -0.55), Color3.fromRGB(30, 30, 36), Enum.Material.Rubber)
+	for _, side in { -1, 1 } do
+		local lens = attach(character, "Head", Vector3.new(0.12, 0.45, 0.45), CFrame.new(side * 0.3, 0.18, -0.7) * CFrame.Angles(0, math.rad(90), 0), palette.Glow, Enum.Material.Neon, Enum.PartType.Cylinder)
+		if lens then
+			lens.Name = "ApexEye"
+		end
+	end
+	hair(character, palette.Secondary)
+	attach(character, "UpperTorso", Vector3.new(0.9, 0.9, 0.9), CFrame.new(0, 0.25, -0.45), palette.Secondary, Enum.Material.Rubber, Enum.PartType.Ball)
+	neon(character, "UpperTorso", Vector3.new(0.95, 0.1, 0.95), CFrame.new(0, 0.25, -0.45), palette.Glow)
+	-- Springy coils on the forearms and shins
+	for _, limb in { "LeftLowerArm", "RightLowerArm", "LeftLowerLeg", "RightLowerLeg" } do
+		for i = 0, 2 do
+			attach(character, limb, Vector3.new(1.12, 0.12, 1.12), CFrame.new(0, -0.35 + i * 0.25, 0), palette.Secondary, Enum.Material.Rubber)
+		end
+	end
+	glowLight(character, "UpperTorso", palette.Glow, 7, 0.6)
+end
+
+builders.Hexa = function(character, palette)
+	baseSuit(character, palette, Enum.Material.Fabric, SKIN)
+	hair(character, Color3.fromRGB(230, 230, 240))
+	paint(character, LIMBS.Hands, palette.Secondary, Enum.Material.Leather)
+	-- Hooded mantle + long coat
+	attach(character, "Head", Vector3.new(1.4, 1.2, 1.4), CFrame.new(0, 0.3, 0.15), palette.Primary, Enum.Material.Fabric, Enum.PartType.Ball)
+	cape(character, palette.Primary, Enum.Material.Fabric, 5, 2.2, 5.8, CFrame.new(0, 0.85, 0.55))
+	armorKit(character, { plate = palette.Secondary, material = Enum.Material.Metal, trim = palette.Glow, shoulders = 0.6, belt = palette.Secondary, chest = false, boots = false })
+	-- Floating rune halo behind the head
+	local halo = neon(character, "Head", Vector3.new(0.08, 1.9, 1.9), CFrame.new(0, 0.3, 0.9) * CFrame.Angles(0, math.rad(90), 0), palette.Glow)
+	if halo then
+		halo.Shape = Enum.PartType.Cylinder
+		halo.Transparency = 0.45
+	end
+	eyes(character, palette.Glow, 0.08)
+	emitter(character, "RightHand", {
+		Color = ColorSequence.new(palette.Glow, Color3.fromRGB(255, 230, 140)),
+		LightEmission = 1,
+		Size = NumberSequence.new(0.25, 0),
+		Lifetime = NumberRange.new(0.5, 0.9),
+		Speed = NumberRange.new(0.5, 1.5),
+		RotSpeed = NumberRange.new(-180, 180),
+		Rate = 14,
+	})
+	glowLight(character, "Head", palette.Glow, 9, 1)
+end
+
+builders.Thornwild = function(character, palette)
+	scale(character, 1.25)
+	baseSuit(character, palette, Enum.Material.Wood)
+	paint(character, LIMBS.Legs, palette.Secondary, Enum.Material.Wood)
+	armorKit(character, { plate = palette.Secondary, material = Enum.Material.WoodPlanks, trim = palette.Glow, shoulders = 1.4, belt = Color3.fromRGB(60, 80, 30) })
+	-- Antler-branches and leafy shoulders
+	for _, side in { -1, 1 } do
+		attach(character, "Head", Vector3.new(0.25, 1.2, 0.25), CFrame.new(side * 0.5, 0.9, 0) * CFrame.Angles(0, 0, math.rad(side * -35)), palette.Secondary, Enum.Material.Wood)
+		attach(character, "Head", Vector3.new(0.2, 0.7, 0.2), CFrame.new(side * 0.95, 1.35, 0) * CFrame.Angles(0, 0, math.rad(side * 20)), palette.Secondary, Enum.Material.Wood)
+		attach(character, "UpperTorso", Vector3.new(1.7, 0.9, 1.7), CFrame.new(side * 1.3, 0.95, 0) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(60, 110, 40), Enum.Material.LeafyGrass, Enum.PartType.Ball)
+	end
+	attach(character, "Head", Vector3.new(1.3, 0.5, 0.3), CFrame.new(0, -0.4, -0.5), Color3.fromRGB(60, 110, 40), Enum.Material.LeafyGrass) -- mossy beard
+	eyes(character, palette.Glow, 0.1)
+	-- Glowing sap veins
+	for i = 1, 4 do
+		neon(character, "UpperTorso", Vector3.new(0.07, 0.8, 0.05), CFrame.new(-0.6 + i * 0.25, 0, -0.7) * CFrame.Angles(0, 0, math.rad(i * 23 % 40 - 20)), palette.Glow)
+	end
+	emitter(character, "UpperTorso", {
+		Color = ColorSequence.new(Color3.fromRGB(120, 180, 60)),
+		Size = NumberSequence.new(0.25, 0.15),
+		Lifetime = NumberRange.new(1.5, 2.5),
+		Speed = NumberRange.new(0.5, 1),
+		Acceleration = Vector3.new(0, -2, 0),
+		RotSpeed = NumberRange.new(-90, 90),
+		SpreadAngle = Vector2.new(180, 180),
+		Rate = 6,
+	})
+	glowLight(character, "UpperTorso", palette.Glow, 9, 0.8)
+end
+
+builders.Glitch = function(character, palette)
+	baseSuit(character, palette, Enum.Material.SmoothPlastic)
+	armorKit(character, { plate = Color3.fromRGB(35, 35, 45), material = Enum.Material.SmoothPlastic, reflectance = 0.2, trim = palette.Secondary, shoulders = 0.7, belt = DARK })
+	-- Visor helmet with a split two-colour display
+	helmet(character, Color3.fromRGB(28, 28, 36), Enum.Material.SmoothPlastic, palette.Glow)
+	attach(character, "Head", Vector3.new(0.55, 0.3, 0.1), CFrame.new(0.3, 0.12, -0.72), palette.Secondary, Enum.Material.Neon)
+	-- Floating "missing pixel" cubes
+	for i = 1, 5 do
+		local cube = neon(character, "UpperTorso", Vector3.new(0.25, 0.25, 0.25), CFrame.new(-0.9 + i * 0.35, (i % 2) * 0.5 - 0.2, -0.75), if i % 2 == 0 then palette.Secondary else palette.Glow)
+		if cube then
+			cube.Transparency = 0.1
+		end
+	end
+	emitter(character, "UpperTorso", {
+		Color = ColorSequence.new(palette.Glow, palette.Secondary),
+		LightEmission = 1,
+		Size = NumberSequence.new(0.2),
+		Lifetime = NumberRange.new(0.1, 0.25),
+		Speed = NumberRange.new(4, 8),
+		SpreadAngle = Vector2.new(180, 180),
+		Shape = Enum.ParticleEmitterShape.Box,
+		Rate = 25,
+	})
+	glowLight(character, "UpperTorso", palette.Glow, 8, 0.9)
+end
+
+builders.Undertow = function(character, palette)
+	baseSuit(character, palette, Enum.Material.Fabric)
+	paint(character, LIMBS.Arms, palette.Secondary, Enum.Material.Fabric)
+	armorKit(character, { plate = Color3.fromRGB(30, 110, 150), material = Enum.Material.Glass, reflectance = 0.3, trim = palette.Glow, shoulders = 0.9, belt = palette.Primary })
+	helmet(character, palette.Primary, Enum.Material.SmoothPlastic, palette.Glow)
+	-- Fin crest + wave-shaped shoulder shells
+	attach(character, "Head", Vector3.new(0.15, 0.7, 1.2), CFrame.new(0, 0.75, 0.2), palette.Glow, Enum.Material.Glass)
+	for _, side in { -1, 1 } do
+		attach(character, "UpperTorso", Vector3.new(1.1, 0.4, 1.4), CFrame.new(side * 1.2, 0.9, 0) * CFrame.Angles(0, 0, math.rad(side * -25)), Color3.fromRGB(230, 240, 245), Enum.Material.Marble)
+	end
+	emitter(character, "UpperTorso", {
+		Color = ColorSequence.new(Color3.fromRGB(170, 230, 255)),
+		Transparency = NumberSequence.new(0.3, 1),
+		Size = NumberSequence.new(0.2, 0.05),
+		Lifetime = NumberRange.new(0.6, 1),
+		Speed = NumberRange.new(1, 3),
+		Acceleration = Vector3.new(0, -8, 0),
+		SpreadAngle = Vector2.new(180, 180),
+		Rate = 18,
+	})
+	glowLight(character, "UpperTorso", palette.Glow, 9, 0.9)
+end
+
+
 --------------------------------------------------------------------------------
 -- Apply
 --------------------------------------------------------------------------------

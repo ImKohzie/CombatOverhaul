@@ -209,6 +209,14 @@ BalanceConfig.Traversal = {
 	Echo = { Name = "Sonic Hop", Kind = "Dash", Distance = 130, Duration = 0.28, Cooldown = 2, Stamina = 12, HitDamage = 25, Shatter = true, Smash = true },
 	Umbra = { Name = "Shadow Dash", Kind = "Dash", Distance = 120, Duration = 0.28, Cooldown = 2, Stamina = 12, HitDamage = 20, Phase = true, Invisible = true },
 	Recruit = { Name = "Dash", Kind = "Dash", Distance = 60, Duration = 0.3, Cooldown = 2, Stamina = 12, HitDamage = 0 },
+	Cinder = { Name = "Jet Burst", Kind = "Flight", Distance = 200, Duration = 0.45, Cooldown = 2.2, Stamina = 14, HitDamage = 30, Smash = true },
+	Tempest = { Name = "Gust Step", Kind = "Dash", Distance = 170, Duration = 0.3, Cooldown = 1.8, Stamina = 12, HitDamage = 20, Shatter = true },
+	Magnus = { Name = "Mag Rail", Kind = "Flight", Distance = 190, Duration = 0.45, Cooldown = 2.2, Stamina = 14, HitDamage = 35, Smash = true },
+	Rebound = { Name = "Pinball", Kind = "Bounce", Distance = 150, Duration = 0.55, Cooldown = 2.3, Stamina = 15, HitDamage = 35, Smash = true, Bounces = 4 },
+	Hexa = { Name = "Blink Stride", Kind = "Dash", Distance = 130, Duration = 0.22, Cooldown = 1.8, Stamina = 12, HitDamage = 20, Phase = true, Invisible = true },
+	Thornwild = { Name = "Vine Swing", Kind = "Pull", Distance = 170, Duration = 0.5, Cooldown = 2.5, Stamina = 15, HitDamage = 30, EndBlast = 12 },
+	Glitch = { Name = "Packet Jump", Kind = "Dash", Distance = 140, Duration = 0.2, Cooldown = 1.6, Stamina = 10, HitDamage = 20, Phase = true, Invisible = true },
+	Undertow = { Name = "Wave Ride", Kind = "Dash", Distance = 150, Duration = 0.4, Cooldown = 2, Stamina = 12, HitDamage = 30, Smash = true, Shatter = true },
 } :: { [string]: Traversal }
 
 BalanceConfig.Rage = { -- Rampage passive
@@ -344,6 +352,62 @@ local Abilities: { [string]: { [string]: AbilityBalance } } = { -- [characterId]
 		Ability2 = { Damage = 90, Cooldown = 12, Range = 80, Params = { BindTime = 1.5 } }, -- Dark Tendrils
 		Ability3 = { Damage = 0, Cooldown = 11, Duration = 6 }, -- Shade Clone
 		Ultimate = { Damage = 380, Cooldown = 1, Duration = 8, Range = 200 }, -- Eclipse
+	},
+
+	Cinder = {
+		Ability1 = { Damage = 130, Cooldown = 9, Range = 200, Params = { BurnDps = 10, BurnTime = 3 } }, -- Flame Burst (100 + burn)
+		Ability2 = { Damage = 120, Cooldown = 11, Range = 45, Params = { ConeDegrees = 70 } }, -- Heat Wave
+		Ability3 = { Damage = 150, Cooldown = 12, WindUp = 0.35, Range = 160, Params = { Radius = 16 } }, -- Meteor Dive
+		Ultimate = { Damage = 410, Cooldown = 1, WindUp = 1.2, Range = 90 }, -- Supernova
+	},
+
+	Tempest = {
+		Ability1 = { Damage = 110, Cooldown = 7, Range = 220, Params = { Blades = 3 } }, -- Gale Cutter
+		Ability2 = { Damage = 130, Cooldown = 12, Duration = 3, Range = 150, Params = { PullRadius = 30 } }, -- Cyclone
+		Ability3 = { Damage = 100, Cooldown = 9, Range = 25 }, -- Updraft
+		Ultimate = { Damage = 400, Cooldown = 1, Duration = 5, Range = 60 }, -- Eye of the Storm
+	},
+
+	Magnus = {
+		Ability1 = { Damage = 140, Cooldown = 10, Range = 180, Params = { Pieces = 5 } }, -- Scrap Volley
+		Ability2 = { Damage = 100, Cooldown = 11, Range = 120 }, -- Polarity Pull
+		Ability3 = { Damage = 120, Cooldown = 10, Range = 40 }, -- Repulse
+		Ultimate = { Damage = 400, Cooldown = 1, Duration = 3, Range = 200, Params = { Radius = 35 } }, -- Iron Storm
+	},
+
+	Rebound = {
+		Ability1 = { Damage = 120, Cooldown = 8, Range = 45 }, -- Slingshot Punch
+		Ability2 = { Damage = 130, Cooldown = 11, Range = 30 }, -- Bounce House
+		Ability3 = { Damage = 0, Cooldown = 14, Duration = 3, Params = { DamageReduction = 0.5 } }, -- Rubber Guard
+		Ultimate = { Damage = 420, Cooldown = 1, Duration = 3, Range = 70, Params = { Hits = 6 } }, -- Pinball Frenzy
+	},
+
+	Hexa = {
+		Ability1 = { Damage = 120, Cooldown = 8, Range = 200, Params = { Bolts = 3 } }, -- Arcane Bolts
+		Ability2 = { Damage = 100, Cooldown = 12, WindUp = 0.4, Range = 120, Params = { BindTime = 1.6, Radius = 12 } }, -- Hex Snare
+		Ability3 = { Damage = 110, Cooldown = 9, Range = 90 }, -- Blink
+		Ultimate = { Damage = 400, Cooldown = 1, Duration = 5, Range = 120, Params = { Radius = 40 } }, -- Rune Circle
+	},
+
+	Thornwild = {
+		Ability1 = { Damage = 110, Cooldown = 9, Range = 35, Params = { BindTime = 0.9, ConeDegrees = 60 } }, -- Thorn Lash
+		Ability2 = { Damage = 150, Cooldown = 11, WindUp = 0.3, Range = 90 }, -- Bramble Line
+		Ability3 = { Damage = 0, Cooldown = 14, Duration = 4, Params = { DamageReduction = 0.5, Heal = 200 } }, -- Barkskin
+		Ultimate = { Damage = 400, Cooldown = 1, WindUp = 0.6, Range = 70, Params = { BindTime = 2 } }, -- Overgrowth
+	},
+
+	Glitch = {
+		Ability1 = { Damage = 130, Cooldown = 9, Range = 80 }, -- Lag Spike
+		Ability2 = { Damage = 0, Cooldown = 12, Duration = 3, Params = { SpeedMultiplier = 1.5 } }, -- Buffer
+		Ability3 = { Damage = 140, Cooldown = 10, Range = 150, Params = { Bolts = 7 } }, -- Pixel Storm
+		Ultimate = { Damage = 420, Cooldown = 1, WindUp = 0.5, Range = 80, Params = { FreezeTime = 1.5 } }, -- System Crash
+	},
+
+	Undertow = {
+		Ability1 = { Damage = 105, Cooldown = 9, Range = 160 }, -- Hydro Jet
+		Ability2 = { Damage = 150, Cooldown = 12, Range = 110 }, -- Tidal Wave
+		Ability3 = { Damage = 120, Cooldown = 11, Duration = 3, Range = 120, Params = { PullRadius = 28 } }, -- Whirlpool
+		Ultimate = { Damage = 410, Cooldown = 1, WindUp = 0.8, Range = 180 }, -- Tsunami
 	},
 }
 BalanceConfig.Abilities = Abilities
