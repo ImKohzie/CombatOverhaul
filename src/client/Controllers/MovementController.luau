@@ -143,7 +143,8 @@ local function step(_dt: number)
 	local stamina = player:GetAttribute("ApexStamina")
 	local hasStamina = type(stamina) == "number" and stamina > 0
 	local moving = humanoid.MoveDirection.Magnitude > 0.1
-	setSprinting(not flying and moving and hasStamina and InputController.isHeld("Sprint") and not CameraController.isAiming())
+	-- Aiming no longer cancels sprint (keeps Voltline's momentum etc.)
+	setSprinting(not flying and moving and hasStamina and InputController.isHeld("Sprint"))
 
 	if flying then
 		return
@@ -171,8 +172,11 @@ local function step(_dt: number)
 		humanoid.WalkSpeed = speed
 	end
 
-	-- Face the crosshair while aiming on foot
-	if CameraController.isAiming() then
+	-- Face the crosshair while aiming on foot - but never while flying,
+	-- sprinting or mid dash / F-move, so aiming can't interrupt fast movement
+	local fast = FlightController.isFlying() or InputController.isHeld("Sprint")
+		or Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude > 45
+	if CameraController.isAiming() and not fast then
 		humanoid.AutoRotate = false
 		local camera = workspace.CurrentCamera
 		if camera then

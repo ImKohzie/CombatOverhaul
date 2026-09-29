@@ -217,7 +217,11 @@ local function afterCamera(dt: number)
 	for _, fov in fovTargets do
 		target = math.max(target, fov)
 	end
-	target *= 1 + (AIM_ZOOM - 1) * aimBlend
+	-- No aim zoom / shoulder shift while moving fast (flight, sprint, F moves)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local fast = root ~= nil and root:IsA("BasePart") and root.AssemblyLinearVelocity.Magnitude > 45
+	target *= 1 + (AIM_ZOOM - 1) * (if fast then 0 else aimBlend)
 	currentFov += (target - currentFov) * math.min(1, dt * FOV_SMOOTH)
 	camera.FieldOfView = currentFov
 

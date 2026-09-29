@@ -2,7 +2,7 @@
 -- Custom flight controller (LinearVelocity + AlignOrientation, no default
 -- physics). Camera-directed: fly where the camera points, WASD strafes
 -- relative to camera, Space ascends, Left Ctrl descends.
---   Hover  : aiming or slow / precise
+--   Hover  : slow / precise (aiming never slows you down)
 --   Cruise : default
 --   Boost  : hold Sprint, drains stamina (server-side), FOV kick, speed
 --            lines, sonic boom ring on entry, wind scales with speed
@@ -389,7 +389,8 @@ local function step(dt: number)
 	local aiming = CameraController.isAiming()
 	local stamina = player:GetAttribute("ApexStamina")
 	local canBoost = type(stamina) == "number" and stamina > 0
-	local wantBoost = moving and not aiming and canBoost and InputController.isHeld("Sprint")
+	-- Aiming never interrupts flight: boost keeps going while you aim
+	local wantBoost = moving and canBoost and InputController.isHeld("Sprint")
 	if wantBoost ~= s.boosting then
 		s.boosting = wantBoost
 		movementRemote:FireServer("Boost", wantBoost)
@@ -399,7 +400,7 @@ local function step(dt: number)
 			CameraController.shake(0.3)
 		end
 	end
-	local speed = if wantBoost then profile.Boost elseif aiming then profile.Hover else profile.Cruise
+	local speed = if wantBoost then profile.Boost else profile.Cruise
 	local target = dir * speed
 
 	-- Momentum: exponential approach, ~AccelTime to cruise / DecelTime to stop
@@ -420,6 +421,8 @@ local function step(dt: number)
 	local currentSpeed = s.velocity.Magnitude
 	local alpha = math.clamp((currentSpeed - profile.Hover) / (profile.Cruise - profile.Hover), 0, 1)
 	local velDir = if currentSpeed > 1 then s.velocity.Unit else camCF.LookVector
+	-- Aim stance (face the crosshair, stand upright) only when nearly hovering
+	aiming = aiming and alpha < 0.3
 	local heading = if aiming or alpha < 0.05 then flat(camCF.LookVector, s.lastHeading) else flat(velDir, flat(camCF.LookVector, s.lastHeading))
 	local tiltAmount = (MAX_TILT[s.kind] or 0.9) * (if aiming then 0.25 else alpha)
 	local tiltDir = if s.kind == "Flight" then velDir else heading
